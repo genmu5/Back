@@ -1,6 +1,9 @@
-package com.example.BEF.VoiceSearch;
+package com.example.BEF.VoiceSearch.Client;
 
 
+import com.example.BEF.VoiceSearch.Config.OpenAIClientConfig;
+import com.example.BEF.VoiceSearch.DTO.WhisperTranscriptionRequest;
+import com.example.BEF.VoiceSearch.DTO.WhisperTranscriptionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;

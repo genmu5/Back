@@ -1,5 +1,8 @@
-package com.example.BEF.VoiceSearch;
+package com.example.BEF.VoiceSearch.Controller;
 
+import com.example.BEF.VoiceSearch.DTO.TranscriptionRequest;
+import com.example.BEF.VoiceSearch.DTO.WhisperTranscriptionResponse;
+import com.example.BEF.VoiceSearch.Service.OpenAIClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ModelAttribute;
