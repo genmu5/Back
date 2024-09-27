@@ -1,15 +1,21 @@
 package com.example.BEF.Location.Domain;
 
 import com.example.BEF.Area.Domain.Area;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)  // 정의되지 않은 필드 무시
+@ToString
 public class Location {
 
     @Id
+    @JsonProperty("contentid")
     @Column(name = "content_id")
     private Long contentId;   // 콘텐츠 ID
 
@@ -17,24 +23,41 @@ public class Location {
     @JoinColumn(name = "area_code")
     private Area area;        // 외래 키 (Area와의 관계)
 
+    @JsonProperty("contenttypeid")
     @Column(name = "content_type_id")
     private Long contentTypeId;  // 관광 타입 ID
+
+    @JsonProperty("title")
     @Column(name = "content_title")
     private String contentTitle; // 콘텐츠 제목
+
+    @JsonProperty("addr1")
     @Column(name = "addr")
     private String addr;         // 주소
+
+    @JsonProperty("addr2")
     @Column(name = "detail_addr")
     private String detailAddr;   // 상세 주소
+
+    @JsonProperty("mapx")
     @Column(name = "gps_x")
     private Double gpsX;         // GPS X 좌표
+
+    @JsonProperty("mapy")
     @Column(name = "gps_y")
     private Double gpsY;         // GPS Y 좌표
+
     @Column(name = "description")
     private String description;  // 개요
+
     @Column(name = "phone_number")
     private String phoneNumber;  // 전화번호
+
+    @JsonProperty("firstimage")
     @Column(name = "original_image")
     private String originalImage; // 원본 이미지
+
+    @JsonProperty("firstimage2")
     @Column(name = "thumbnail_image")
     private String thumbnailImage; // 썸네일 이미지
 
