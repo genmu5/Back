@@ -1,4 +1,4 @@
-package com.example.BEF.VoiceSearch;
+package com.example.BEF.VoiceSearch.Config;
 
 import feign.RequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
