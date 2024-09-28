@@ -1,6 +1,7 @@
-package com.example.BEF.DataSetting.Service;
+package com.example.BEF.Data.Service;
 
 import com.example.BEF.Area.Domain.Area;
+import com.example.BEF.Area.Service.AreaRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -20,20 +21,29 @@ import java.util.List;
 
 @Service
 public class SettingAreaService {
-    @Value("${openapi.servicekey}")
+    @Value("${openapi.service-key}")
     private String serviceKey;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    AreaRepository areaRepository;
+
+    String defaultURL = "https://apis.data.go.kr/B551011/KorWithService1/";
+    String defaultURL2 = "&MobileOS=IOS&MobileApp=BEF&_type=json";
+
     private static final Logger log = LoggerFactory.getLogger(SettingAreaService.class);
 
     public void settingAreaData() {
+
+        String service = "&serviceKey=" + serviceKey;
+
         StringBuffer result = new StringBuffer();
 
         try {
             // API URL 설정
-            URL url = new URL("https://apis.data.go.kr/B551011/KorWithService1/areaCode1?serviceKey=" + serviceKey + "&MobileOS=ETC&MobileApp=BEF&numOfRows=20&_type=json");
+            URL url = new URL(defaultURL + "areaCode1?" + service + defaultURL2 + "numOfRows=20");
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setRequestProperty("Content-type", "application/json");
@@ -47,19 +57,15 @@ public class SettingAreaService {
                 result.append(line);
             }
 
-            // 읽은 결과 로그 출력 (확인용)
-            log.info("API Response: {}", result.toString());
-
             // JSON 파싱 (JSON 형태를 가정)
             JSONObject jsonResponse = new JSONObject(result.toString());
             JSONObject responseBody = jsonResponse.getJSONObject("response").getJSONObject("body");
-            JSONObject items = responseBody.getJSONObject("items");
-            JSONArray itemArray = items.getJSONArray("item");
+            JSONArray items = responseBody.getJSONObject("items").getJSONArray("item");
 
             // 'code'와 'name' 추출
             List<Area> areaList = new ArrayList<>();
-            for (int i = 0; i < itemArray.length(); i++) {
-                JSONObject item = itemArray.getJSONObject(i);
+            for (int i = 0; i < items.length(); i++) {
+                JSONObject item = items.getJSONObject(i);
                 String code = item.getString("code");
                 String name = item.getString("name");
 
@@ -72,21 +78,11 @@ public class SettingAreaService {
             }
 
             // 데이터 DB 삽입 (여기서는 생략)
-            insertAreasIntoDB(areaList);
+            areaRepository.saveAll(areaList);
+            log.info("Areas inserted successfully into the database.");
 
         } catch (Exception e) {
             log.error("An error occurred while calling the API or processing data: ", e);
         }
-    }
-
-    private void insertAreasIntoDB(List<Area> areaList) {
-        String sql = "INSERT INTO area (area_code, area_name) VALUES (?, ?)";
-
-        for (Area area : areaList) {
-            jdbcTemplate.update(sql, area.getAreaCode(), area.getAreaName());
-        }
-
-        // 삽입 완료 로그 출력
-        System.out.println("Areas inserted successfully into the database.");
     }
 }
