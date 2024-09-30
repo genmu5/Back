@@ -6,6 +6,7 @@ import com.example.BEF.Location.Domain.Location;
 public class MapLocationResponse {
 
     //location 관련 컬럼
+    private Long contentId;
     private String contentTitle;
     private String addr;
     private Double gpsX;
@@ -37,6 +38,7 @@ public class MapLocationResponse {
 
 
     public MapLocationResponse(Location location, Disabled disabled) {
+        this.contentId = location.getContentId();
         this.contentTitle = location.getContentTitle();
         this.addr = location.getAddr();
         this.gpsX = location.getGpsX();
@@ -61,6 +63,9 @@ public class MapLocationResponse {
             this.babySpareChair = disabled.getBabySpareChair();
         }
     }
+    public Long getContentId() { return contentId; }
+
+    public void setContentId(Long contentId) { this.contentId = contentId; }
 
     public String getContentTitle() {
         return contentTitle;
