@@ -1,5 +1,6 @@
 package com.example.BEF.User.Service;
 
+import com.example.BEF.User.DTO.UserDisabledDTO;
 import com.example.BEF.User.DTO.UserJoinReq;
 import com.example.BEF.User.DTO.UserJoinRes;
 import com.example.BEF.User.Domain.User;
@@ -34,5 +35,12 @@ public class UserService {
 
         // 유저 정보 리턴
         return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName()));
+    }
+
+    public UserDisabledDTO settingUserDisabled(Long userNumber) {
+        User disabledUser = userRepository.findUserByUserNumber(userNumber);
+
+        return (new UserDisabledDTO(disabledUser.getSenior(), disabledUser.getWheelchair(),
+                disabledUser.getBlindHandicap(), disabledUser.getHearingHandicap(), disabledUser.getInfantsFamily()));
     }
 }
