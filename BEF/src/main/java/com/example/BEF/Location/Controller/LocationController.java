@@ -1,5 +1,6 @@
 package com.example.BEF.Location.Controller;
 
+import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.DTO.UserLocationRes;
 import com.example.BEF.Location.Service.LocationService;
 import com.example.BEF.User.Service.UserRepository;
@@ -31,5 +32,16 @@ public class LocationController {
 
         // 필터링된 관광지 리스트 리턴
         return new ResponseEntity<>(locationService.findLocationWithDisabled(userNumber), HttpStatus.OK);
+    }
+
+    // 지역(구) 기반 관광지 리스트 검색
+    @GetMapping("/district")
+    public ResponseEntity<List<LocationInfoRes>> getDistrictLocations(@RequestParam("district") String district) {
+        // 존재하지 않는 지역명인 경우
+        if (district == null)
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
+        // 필터링된 관광지 리스트 리턴
+        return new ResponseEntity<>(locationService.findLocationWithDistrict(district), HttpStatus.OK);
     }
 }
