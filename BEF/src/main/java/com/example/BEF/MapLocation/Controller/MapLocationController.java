@@ -5,14 +5,12 @@ import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.MapLocation.DTO.MapLocationResponse;
 import com.example.BEF.Disabled.Service.DisabledService;
 import com.example.BEF.MapLocation.Service.MapLocationService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api")
 public class MapLocationController {
