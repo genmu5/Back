@@ -1,9 +1,12 @@
 package com.example.BEF.User.Domain;
 
+import com.example.BEF.Course.Domain.Course;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -14,6 +17,9 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userNumber;      // 유저 번호
+
+    @OneToMany(mappedBy = "user")
+    List<Course> courseList;
 
     @Column(name = "user_name")
     private String userName;      // 유저 이름

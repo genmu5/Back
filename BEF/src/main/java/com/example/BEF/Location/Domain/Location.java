@@ -1,6 +1,8 @@
 package com.example.BEF.Location.Domain;
 
 import com.example.BEF.Area.Domain.Area;
+import com.example.BEF.Disabled.Domain.Disabled;
+import com.example.BEF.Course.Domain.UserCourse;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -8,7 +10,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Entity
+@Table(name = "location")
 @Getter @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)  // 정의되지 않은 필드 무시
 @ToString
@@ -22,6 +27,12 @@ public class Location {
     @ManyToOne
     @JoinColumn(name = "area_code")
     private Area area;        // 외래 키 (Area와의 관계)
+
+    @OneToOne(mappedBy = "location")
+    private Disabled disabled;
+
+    @OneToMany(mappedBy = "location")
+    List<UserCourse> userCourseList;
 
     @JsonProperty("contenttypeid")
     @Column(name = "content_type_id")
