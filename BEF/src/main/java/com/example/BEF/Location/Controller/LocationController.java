@@ -24,13 +24,13 @@ public class LocationController {
 
     // 유저 장애 정보 기반 관광지 리스트 검색
     @GetMapping("/recommend")
-    public ResponseEntity<List<LocationInfoRes>> getRecLocations(@RequestParam("travelType") List<String> travelType, @RequestParam("userNumber") Long userNumber) {
+    public ResponseEntity<List<LocationInfoRes>> getRecLocations(@RequestParam("userNumber") Long userNumber) {
         // 존재하지 않는 유저인 경우
         if (userRepository.findUserByUserNumber(userNumber) == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 
         // 필터링된 관광지 리스트 리턴
-        return new ResponseEntity<>(locationService.filteringLocations(travelType, userNumber), HttpStatus.OK);
+        return new ResponseEntity<>(locationService.filteringLocations(userNumber), HttpStatus.OK);
     }
 
     // 지역(구) 기반 관광지 리스트 검색

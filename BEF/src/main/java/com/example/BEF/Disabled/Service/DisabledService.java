@@ -71,7 +71,7 @@ public class DisabledService {
         if (travelTypes != null && !travelTypes.isEmpty()) {
             queryBuilder.append("AND (");
             for (int i = 0; i < travelTypes.size(); i++) {
-                queryBuilder.append("l.description LIKE :travelType" + i);
+                queryBuilder.append("l.description LIKE :travelType").append(i);
                 if (i < travelTypes.size() - 1) {
                     queryBuilder.append(" OR ");
                 }

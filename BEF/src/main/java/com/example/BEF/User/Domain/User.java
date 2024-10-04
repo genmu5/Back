@@ -39,6 +39,18 @@ public class User {
     @Column(name = "infants_family")
     private Boolean infantsFamily; // 영유아 가족
 
+    @Column(name = "forest")
+    private Boolean forest;
+
+    @Column(name = "ocean")
+    private Boolean ocean;
+
+    @Column(name = "culture")
+    private Boolean culture;
+
+    @Column(name = "outside")
+    private Boolean outside;
+
     public User(String userName, String gender, Long age, Boolean senior, Boolean wheelchair, Boolean blindHandicap, Boolean hearingHandicap, Boolean infantsFamily) {
         this.userName = userName;
         this.gender = gender;

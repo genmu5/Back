@@ -6,6 +6,8 @@ import com.example.BEF.Disabled.Service.DisabledService;
 import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.User.DTO.UserDisabledDTO;
+import com.example.BEF.User.Domain.User;
+import com.example.BEF.User.Service.UserRepository;
 import com.example.BEF.User.Service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,21 +33,25 @@ public class LocationService {
     @Autowired
     LocationRepository locationRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     // 관광지 필터링 - 유저 장애 정보 관련
-    public List<LocationInfoRes> filteringLocations(List<String> travelType, Long userNumber) {
+    public List<LocationInfoRes> filteringLocations(Long userNumber) {
         // 필터링된 관광지 리스트
         List<LocationInfoRes> locationInfoResList = new ArrayList<>();
 
         // 여행 타입별 단어 리스트
+        User user = userRepository.findUserByUserNumber(userNumber);
         List<String> userType = new ArrayList<>();
 
-        if (travelType.contains("forest"))
+        if (user.getForest())
             userType.addAll(Arrays.asList("숲", "휴양림", "산림욕장", "치유"));
-        if (travelType.contains("ocean"))
+        if (user.getOcean())
             userType.addAll(Arrays.asList("해수욕장", "바다", "물놀이", "호수"));
-        if (travelType.contains("history"))
+        if (user.getCulture())
             userType.addAll(Arrays.asList("박물관", "미술관", "역사", "문화", "사찰"));
-        if (travelType.contains("outside"))
+        if (user.getOutside())
             userType.addAll(Arrays.asList("가족", "어린이", "공원", "파크", "레저"));
 
         // 유저 장애 정보
@@ -65,7 +71,6 @@ public class LocationService {
             idx++;
         }
 
-        log.info("관광지 리스트 개수 : {}", locationInfoResList.size());
         return (locationInfoResList);
     }
 
@@ -83,7 +88,6 @@ public class LocationService {
             locationInfoResList.add(locationInfoRes);
         }
 
-        log.info("관광지 리스트 개수 : {}", locationInfoResList.size());
         return (locationInfoResList);
     }
 }

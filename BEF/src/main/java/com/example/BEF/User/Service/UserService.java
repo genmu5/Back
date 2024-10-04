@@ -30,6 +30,12 @@ public class UserService {
         savedUser.setHearingHandicap(userJoinReq.getHearingHandicap());
         savedUser.setInfantsFamily(userJoinReq.getInfantsFamily());
 
+        // 유저 여행 타입 설정
+        savedUser.setForest(userJoinReq.getTravelType().contains("forest"));
+        savedUser.setOcean(userJoinReq.getTravelType().contains("ocean"));
+        savedUser.setCulture(userJoinReq.getTravelType().contains("culture"));
+        savedUser.setOutside(userJoinReq.getTravelType().contains("outside"));
+
         // 유저 저장
         userRepository.save(savedUser);
 
