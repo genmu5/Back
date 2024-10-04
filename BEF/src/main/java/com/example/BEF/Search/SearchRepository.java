@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface SearchRepository extends JpaRepository<Location , String> {
-    @Query("Select l From Location l where l.contentTitle Like %:keyword%")
+public interface SearchRepository extends JpaRepository<Location , Long> {
+    @Query("SELECT l FROM Location l WHERE l.contentTitle LIKE CONCAT('%', :keyword, '%')")
     List<Location> findByKeyword(@Param("keyword") String keyword);
+
 }
