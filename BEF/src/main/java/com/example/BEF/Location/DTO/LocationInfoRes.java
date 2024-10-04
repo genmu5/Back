@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class LocationInfoRes {
     //location 관련
+    private Long   contentId;
     private String contentTitle;
     private String addr;
     private Double gpsX;
@@ -38,6 +39,7 @@ public class LocationInfoRes {
     private String babySpareChair;
 
     public LocationInfoRes(Location location, Disabled disabled) {
+        this.contentId = location.getContentId();
         this.contentTitle = location.getContentTitle();
         this.addr = location.getAddr();
         this.gpsX = location.getGpsX();

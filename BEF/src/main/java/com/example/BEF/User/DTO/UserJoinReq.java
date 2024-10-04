@@ -2,6 +2,8 @@ package com.example.BEF.User.DTO;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UserJoinReq {
     private String userName;
@@ -12,6 +14,7 @@ public class UserJoinReq {
     private Boolean blindHandicap;
     private Boolean hearingHandicap;
     private Boolean infantsFamily;
+    private List<String> travelType;
 
     public boolean validJoin() {
         if (userName == null || userName.isBlank())
@@ -28,8 +31,6 @@ public class UserJoinReq {
             return false;
         else if (hearingHandicap == null)
             return false;
-        else if (infantsFamily == null)
-            return false;
-        return true;
+        else return infantsFamily != null;
     }
 }
