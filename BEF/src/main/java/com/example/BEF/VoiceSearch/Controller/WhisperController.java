@@ -1,6 +1,5 @@
 package com.example.BEF.VoiceSearch.Controller;
 
-import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.MapLocation.DTO.MapLocationResponse;
 import com.example.BEF.VoiceSearch.DTO.TranscriptionRequest;
 import com.example.BEF.VoiceSearch.DTO.WhisperTranscriptionResponse;
