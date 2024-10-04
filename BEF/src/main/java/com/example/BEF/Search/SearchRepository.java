@@ -10,4 +10,5 @@ import java.util.List;
 public interface SearchRepository extends JpaRepository<Location , Long> {
     @Query("SELECT l FROM Location l WHERE l.contentTitle LIKE CONCAT('%', :keyword, '%')")
     List<Location> findByKeyword(@Param("keyword") String keyword);
+
 }

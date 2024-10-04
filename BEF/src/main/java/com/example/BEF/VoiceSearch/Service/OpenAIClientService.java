@@ -1,6 +1,9 @@
 package com.example.BEF.VoiceSearch.Service;
 
+import com.example.BEF.Disabled.Domain.Disabled;
+import com.example.BEF.Disabled.Service.DisabledRepository;
 import com.example.BEF.Location.Domain.Location;
+import com.example.BEF.MapLocation.DTO.MapLocationResponse;
 import com.example.BEF.VoiceSearch.Config.OpenAIClientConfig;
 import com.example.BEF.VoiceSearch.DTO.TranscriptionRequest;
 import com.example.BEF.VoiceSearch.DTO.WhisperTranscriptionRequest;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -21,6 +25,7 @@ public class OpenAIClientService {
     private final OpenAIClient openAIClient;
     private final OpenAIClientConfig openAIClientConfig;
     private final DescriptionRepository descriptionRepository;
+    private final DisabledRepository disabledRepository;
 
     public WhisperTranscriptionResponse createTranscription(TranscriptionRequest transcriptionRequest){
         WhisperTranscriptionRequest whisperTranscriptionRequest = WhisperTranscriptionRequest.builder()
@@ -40,11 +45,19 @@ public class OpenAIClientService {
                 .orElse("키워드 없음");
     }
     // location 테이블에서 키워드에 해당하는 튜플 조회후 리스트 형식으로 반환
-    public List<Location> searchLocationsByKeyword(String transcribedText) {
+    public List<MapLocationResponse> searchLocationsByKeyword(String transcribedText) {
         String keyword = filterTranscription(transcribedText);
 
         if (keyword != null) {
-            return descriptionRepository.findDescription(keyword);
+            List<Location> locations = descriptionRepository.findDescription(keyword);
+
+            // Location 리스트를 MapLocationResponse 리스트로 변환
+            return locations.stream()
+                    .map(location -> {
+                        Disabled disabled = disabledRepository.findDisabledByLocation(location);
+                        return new MapLocationResponse(location, disabled);
+                    })
+                    .collect(Collectors.toList());
         } else {
             return new ArrayList<>();  // 키워드가 없을 경우 빈 리스트 반환
         }
