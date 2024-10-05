@@ -17,7 +17,7 @@ public class Disabled {
     @Column(name = "disabled_number")
     private Long disabledNumber;  // 장애시설코드
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "content_id", nullable = false)
     private Location location;
 

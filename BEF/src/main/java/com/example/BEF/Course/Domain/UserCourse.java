@@ -1,0 +1,29 @@
+package com.example.BEF.Course.Domain;
+
+import com.example.BEF.Location.Domain.Location;
+import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "user_course")
+@NoArgsConstructor
+public class UserCourse {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_course_number")
+    private Long userCourseNumber;
+
+    @ManyToOne
+    @JoinColumn(name = "course_number")
+    private Course course;
+
+    @ManyToOne
+    @JoinColumn(name = "content_id")
+    private Location location;
+
+    public UserCourse(Course course, Location location) {
+        this.course = course;
+        this.location = location;
+    }
+}
