@@ -75,11 +75,19 @@ public class LocationService {
     }
 
     // 관광지 필터링 - 지역 관련
-    public List<LocationInfoRes> findLocationWithDistrict(String district) {
+    public List<LocationInfoRes> findLocationWithDistrict(String state, String city) {
 
-        // 필터링 된 관광지 리스트
+        // 필터링 된 관광지 리스트 + 지역구 리스트
         List<LocationInfoRes> locationInfoResList = new ArrayList<>();
-        List<Location> locationList = locationRepository.findByAddrContaining(district);
+
+        // 지역 검색어
+        String loc;
+        if (city.equals("전체"))
+            loc = state;
+        else
+            loc = state + " " + city;
+
+        List<Location> locationList = locationRepository.findByAddrContaining(loc);
 
         // 필터링 된 관광지 정보 리스트 리턴
         for (Location location : locationList) {
