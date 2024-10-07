@@ -35,12 +35,12 @@ public class LocationController {
 
     // 지역(구) 기반 관광지 리스트 검색
     @GetMapping("/district")
-    public ResponseEntity<List<LocationInfoRes>> getDistrictLocations(@RequestParam("district") String district) {
+    public ResponseEntity<List<LocationInfoRes>> getDistrictLocations(@RequestParam("state") String state, @RequestParam("city") String city) {
         // 존재하지 않는 지역명인 경우
-        if (district == null)
+        if (state == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 
         // 필터링된 관광지 리스트 리턴
-        return new ResponseEntity<>(locationService.findLocationWithDistrict(district), HttpStatus.OK);
+        return new ResponseEntity<>(locationService.findLocationWithDistrict(state, city), HttpStatus.OK);
     }
 }
