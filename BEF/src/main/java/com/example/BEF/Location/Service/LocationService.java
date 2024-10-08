@@ -81,13 +81,10 @@ public class LocationService {
         List<LocationInfoRes> locationInfoResList = new ArrayList<>();
 
         // 지역 검색어
-        String loc;
         if (city.equals("전체"))
-            loc = state;
-        else
-            loc = state + " " + city;
+            city = "";
 
-        List<Location> locationList = locationRepository.findByAddrContaining(loc);
+        List<Location> locationList = locationRepository.findByAddrContainingAndAddrContaining(state, city);
 
         // 필터링 된 관광지 정보 리스트 리턴
         for (Location location : locationList) {

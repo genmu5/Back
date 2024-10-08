@@ -8,5 +8,5 @@ import java.util.List;
 public interface LocationRepository extends JpaRepository<Location, Long> {
     Location findLocationByContentId(Long contentId);
 
-    List<Location> findByAddrContaining(String district);
+    List<Location> findByAddrContainingAndAddrContaining(String state, String city);
 }
