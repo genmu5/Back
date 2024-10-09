@@ -45,7 +45,7 @@ public class UserService {
         userRepository.save(savedUser);
 
         // 유저 저장한 관광지 리스트
-        Course saveCourse = new Course(savedUser, "저장");
+        Course saveCourse = new Course(savedUser, "저장", "");
         courseRepository.save(saveCourse);
 
         // 유저 정보 리턴

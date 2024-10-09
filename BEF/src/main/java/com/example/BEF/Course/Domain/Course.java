@@ -20,12 +20,16 @@ public class Course {
     @Column(name = "course_name")
     private String courseName;
 
+    @Column(name = "description")
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "user_number")
     private User user;
 
-    public Course(User user, String courseName) {
+    public Course(User user, String courseName, String description) {
         this.user = user;
         this.courseName = courseName;
+        this.description = description;
     }
 }
