@@ -1,7 +1,9 @@
 package com.example.BEF.Course.Controller;
 
+import com.example.BEF.Course.DTO.CourseAddReq;
 import com.example.BEF.Course.DTO.CourseInfoRes;
 import com.example.BEF.Course.DTO.CourseLocRes;
+import com.example.BEF.Course.DTO.CourseSaveRes;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Service.CourseRepository;
 import com.example.BEF.Course.Service.CourseService;
@@ -63,32 +65,31 @@ public class CourseController {
     }
 
     // 코스 장소 추가 API
-    @PostMapping("/{courseNumber}/add/{contentId}")
-    public ResponseEntity<CourseLocRes> addLocation(@PathVariable("courseNumber") Long courseNumber, @PathVariable("contentId") Long contentId) {
+    @PostMapping("/{courseNumber}/add")
+    public ResponseEntity<CourseLocRes> addLocation(@PathVariable("courseNumber") Long courseNumber, @RequestBody CourseAddReq courseAddReq) {
         // 코스 및 관광지 조회
         Course course = courseRepository.findCourseByCourseNumber(courseNumber);
-        Location location = locationRepository.findLocationByContentId(contentId);
 
         // 존재하지 않는 코스 및 관광지일 때
-        if (course == null || location == null)
+        if (course == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
-        return ResponseEntity.status(HttpStatus.OK).body(courseService.addLocToCourse(course, location));
+        return ResponseEntity.status(HttpStatus.OK).body(courseService.addLocToCourse(course, courseAddReq.getContentIdList()));
     }
 
-    // 코스 장소 삭제 API
-    @DeleteMapping("/{courseNumber}/delete/{contentId}")
-    public ResponseEntity<CourseLocRes> delLocation(@PathVariable("courseNumber") Long courseNumber, @PathVariable("contentId") Long contentId) {
-        // 코스 및 관광지 조회
-        Course course = courseRepository.findCourseByCourseNumber(courseNumber);
-        Location location = locationRepository.findLocationByContentId(contentId);
-
-        // 존재하지 않는 코스 및 관광지일 때
-        if (course == null || location == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-
-        return ResponseEntity.status(HttpStatus.OK).body(courseService.delLocToCourse(course, location));
-    }
+    // 코스 장소 삭제 API - 수정 필요
+//    @DeleteMapping("/{courseNumber}/delete/{contentId}")
+//    public ResponseEntity<CourseLocRes> delLocation(@PathVariable("courseNumber") Long courseNumber, @PathVariable("contentId") Long contentId) {
+//        // 코스 및 관광지 조회
+//        Course course = courseRepository.findCourseByCourseNumber(courseNumber);
+//        Location location = locationRepository.findLocationByContentId(contentId);
+//
+//        // 존재하지 않는 코스 및 관광지일 때
+//        if (course == null || location == null)
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(courseService.delLocToCourse(course, location));
+//    }
 
     // 나의 코스 목록 조회 API
     @GetMapping("/{userNumber}")
@@ -105,7 +106,7 @@ public class CourseController {
 
     // 관광지 저장 API
     @PostMapping("/save")
-    public ResponseEntity<CourseLocRes> saveLocation(@RequestParam("userNumber") Long userNumber, @RequestParam("contentId") Long contentId) {
+    public ResponseEntity<CourseSaveRes> saveLocation(@RequestParam("userNumber") Long userNumber, @RequestParam("contentId") Long contentId) {
         // 유저 및 관광지 조회
         User user = userRepository.findUserByUserNumber(userNumber);
         Location location = locationRepository.findLocationByContentId(contentId);
