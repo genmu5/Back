@@ -2,11 +2,13 @@ package com.example.BEF.Course.Domain;
 
 import com.example.BEF.Location.Domain.Location;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "user_course")
 @NoArgsConstructor
+@Getter
 public class UserCourse {
 
     @Id

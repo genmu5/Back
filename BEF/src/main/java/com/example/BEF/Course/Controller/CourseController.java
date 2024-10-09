@@ -5,6 +5,7 @@ import com.example.BEF.Course.DTO.CourseLocRes;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Service.CourseRepository;
 import com.example.BEF.Course.Service.CourseService;
+import com.example.BEF.Location.DTO.UserLocationRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Service.LocationRepository;
 import com.example.BEF.User.Domain.User;
@@ -100,5 +101,45 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         return ResponseEntity.status(HttpStatus.OK).body(courseService.findUserCourses(user));
+    }
+
+    // 관광지 저장 API
+    @PostMapping("/save")
+    public ResponseEntity<CourseLocRes> saveLocation(@RequestParam("userNumber") Long userNumber, @RequestParam("contentId") Long contentId) {
+        // 유저 및 관광지 조회
+        User user = userRepository.findUserByUserNumber(userNumber);
+        Location location = locationRepository.findLocationByContentId(contentId);
+
+        // 존재하지 않는 관광지일 때
+        if (location == null || user == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        return ResponseEntity.status(HttpStatus.OK).body(courseService.saveLocation(user, location));
+    }
+
+    // 저장한 관광지 조회 API
+    @GetMapping("/save/{userNumber}")
+    public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("userNumber") Long userNumber) {
+        // 유저 조회
+        User user = userRepository.findUserByUserNumber(userNumber);
+
+        // 존재하지 않는 유저일 때
+        if (user == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        return ResponseEntity.status(HttpStatus.OK).body(courseService.getUserSaveLocations(user));
+    }
+
+    // 코스 관광지 조회 API
+    @GetMapping("/{courseNumber}/list")
+    public ResponseEntity<List<UserLocationRes>> CourseLocationList(@PathVariable("courseNumber") Long courseNumber) {
+        // 유저 조회
+        Course course = courseRepository.findCourseByCourseNumber(courseNumber);
+
+        // 존재하지 않는 유저일 때
+        if (course == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        return ResponseEntity.status(HttpStatus.OK).body(courseService.getCourseLocationList(course));
     }
 }
