@@ -2,9 +2,13 @@ package com.example.BEF.Course.Service;
 
 import com.example.BEF.Course.DTO.CourseInfoRes;
 import com.example.BEF.Course.DTO.CourseLocRes;
+import com.example.BEF.Course.DTO.CourseLocationRes;
 import com.example.BEF.Course.DTO.CourseSaveRes;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Domain.UserCourse;
+import com.example.BEF.Disabled.Domain.Disabled;
+import com.example.BEF.Disabled.Service.DisabledRepository;
+import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.DTO.UserLocationRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Service.LocationRepository;
@@ -25,6 +29,9 @@ public class CourseService {
 
     @Autowired
     LocationRepository locationRepository;
+
+    @Autowired
+    DisabledRepository disabledRepository;
 
     // 코스 생성
     public CourseInfoRes createUserCourse(User user, String name, String description) {
@@ -99,6 +106,7 @@ public class CourseService {
         List<UserCourse> userCourses = userCourseRepository.findUserCoursesByCourse(saveLocations);
 
         List<UserLocationRes> userLocationResList = new ArrayList<>();
+
         for (UserCourse userCourse : userCourses) {
             Location location = userCourse.getLocation();
             UserLocationRes userLocationRes = new UserLocationRes(location.getContentId(), location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
@@ -109,18 +117,20 @@ public class CourseService {
     }
 
     // 코스 관광지 목록 조회
-    public List<UserLocationRes> getCourseLocationList(Course course) {
+    public CourseLocationRes getCourseLocationList(Course course) {
 
         // 저장한 관광지 정보 리스트
         List<UserCourse> userCourses = userCourseRepository.findUserCoursesByCourse(course);
 
-        List<UserLocationRes> userLocationResList = new ArrayList<>();
+        List<LocationInfoRes> locationInfoResList = new ArrayList<>();
+
         for (UserCourse userCourse : userCourses) {
             Location location = userCourse.getLocation();
-            UserLocationRes userLocationRes = new UserLocationRes(location.getContentId(), location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
-            userLocationResList.add(userLocationRes);
+            Disabled disabled = disabledRepository.findDisabledByLocation(location);
+            LocationInfoRes locationInfoRes = new LocationInfoRes(location, disabled);
+            locationInfoResList.add(locationInfoRes);
         }
 
-        return (userLocationResList);
+        return (new CourseLocationRes(course, locationInfoResList));
     }
 }
