@@ -1,12 +1,10 @@
 package com.example.BEF.Course.Controller;
 
-import com.example.BEF.Course.DTO.CourseAddReq;
-import com.example.BEF.Course.DTO.CourseInfoRes;
-import com.example.BEF.Course.DTO.CourseLocRes;
-import com.example.BEF.Course.DTO.CourseSaveRes;
+import com.example.BEF.Course.DTO.*;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Service.CourseRepository;
 import com.example.BEF.Course.Service.CourseService;
+import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.DTO.UserLocationRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Service.LocationRepository;
@@ -133,7 +131,7 @@ public class CourseController {
 
     // 코스 관광지 조회 API
     @GetMapping("/{courseNumber}/list")
-    public ResponseEntity<List<UserLocationRes>> CourseLocationList(@PathVariable("courseNumber") Long courseNumber) {
+    public ResponseEntity<CourseLocationRes> CourseLocationList(@PathVariable("courseNumber") Long courseNumber) {
         // 유저 조회
         Course course = courseRepository.findCourseByCourseNumber(courseNumber);
 
