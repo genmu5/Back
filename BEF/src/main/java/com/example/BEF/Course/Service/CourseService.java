@@ -22,11 +22,11 @@ public class CourseService {
     UserCourseRepository userCourseRepository;
 
     // 코스 생성
-    public CourseInfoRes createUserCourse(User user, String name) {
-        Course course = new Course(user, name);
+    public CourseInfoRes createUserCourse(User user, String name, String description) {
+        Course course = new Course(user, name, description);
         courseRepository.save(course);
 
-        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
+        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName(), course.getDescription());
     }
 
     // 코스 삭제
@@ -38,7 +38,7 @@ public class CourseService {
         // 코스 정보 삭제
         courseRepository.delete(course);
 
-        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
+        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName(), course.getDescription());
     }
 
     // 코스 장소 추가
@@ -91,7 +91,7 @@ public class CourseService {
         List<UserLocationRes> userLocationResList = new ArrayList<>();
         for (UserCourse userCourse : userCourses) {
             Location location = userCourse.getLocation();
-            UserLocationRes userLocationRes = new UserLocationRes(location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
+            UserLocationRes userLocationRes = new UserLocationRes(location.getContentId(), location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
             userLocationResList.add(userLocationRes);
         }
 
@@ -107,7 +107,7 @@ public class CourseService {
         List<UserLocationRes> userLocationResList = new ArrayList<>();
         for (UserCourse userCourse : userCourses) {
             Location location = userCourse.getLocation();
-            UserLocationRes userLocationRes = new UserLocationRes(location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
+            UserLocationRes userLocationRes = new UserLocationRes(location.getContentId(), location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
             userLocationResList.add(userLocationRes);
         }
 

@@ -35,7 +35,7 @@ public class CourseController {
 
     // 코스 리스트 생성 API
     @PostMapping("/{userNumber}/create")
-    public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("userNumber") Long userNumber, @RequestParam("name") String name) {
+    public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("userNumber") Long userNumber, @RequestParam("name") String name, @RequestParam("description") String description) {
         // 유저 조회
         User user = userRepository.findUserByUserNumber(userNumber);
 
@@ -44,7 +44,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         // 코스 생성
-        return ResponseEntity.status(HttpStatus.OK).body(courseService.createUserCourse(user, name));
+        return ResponseEntity.status(HttpStatus.OK).body(courseService.createUserCourse(user, name, description));
     }
 
     // 코스 리스트 삭제 API
