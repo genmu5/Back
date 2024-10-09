@@ -1,5 +1,7 @@
 package com.example.BEF.User.Service;
 
+import com.example.BEF.Course.Domain.Course;
+import com.example.BEF.Course.Service.CourseRepository;
 import com.example.BEF.User.DTO.UserDisabledDTO;
 import com.example.BEF.User.DTO.UserJoinReq;
 import com.example.BEF.User.DTO.UserJoinRes;
@@ -11,6 +13,9 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    CourseRepository courseRepository;
 
     public UserJoinRes saveUser(UserJoinReq userJoinReq) {
         // 저장할 유저 생성
@@ -38,6 +43,10 @@ public class UserService {
 
         // 유저 저장
         userRepository.save(savedUser);
+
+        // 유저 저장한 관광지 리스트
+        Course saveCourse = new Course(savedUser, "저장");
+        courseRepository.save(saveCourse);
 
         // 유저 정보 리턴
         return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName()));

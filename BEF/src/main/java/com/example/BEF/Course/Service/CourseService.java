@@ -4,11 +4,13 @@ import com.example.BEF.Course.DTO.CourseInfoRes;
 import com.example.BEF.Course.DTO.CourseLocRes;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Domain.UserCourse;
+import com.example.BEF.Location.DTO.UserLocationRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.User.Domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -62,5 +64,53 @@ public class CourseService {
     // 코스 목록 조회
     public List<CourseInfoRes> findUserCourses(User user) {
         return courseRepository.findCourseNumbersAndCourseNamesByUser(user);
+    }
+
+    // 관광지 저장
+    public CourseLocRes saveLocation(User user, Location location) {
+        // 유저가 저장한 관광지 코스
+        Course saveLocations = courseRepository.findCourseByUserAndCourseName(user, "저장");
+
+        // 유저 코스 정보 생성
+        UserCourse userCourse = new UserCourse(saveLocations, location);
+        userCourseRepository.save(userCourse);
+
+        // 유저 코스 응답 리턴
+        return (new CourseLocRes(saveLocations.getCourseNumber(), saveLocations.getCourseName(), location.getContentId()));
+    }
+
+    // 저장한 관광지 목록 조회
+    public List<UserLocationRes> getUserSaveLocations(User user) {
+
+        // 유저가 저장한 관광지 코스
+        Course saveLocations = courseRepository.findCourseByUserAndCourseName(user, "저장");
+
+        // 저장한 관광지 정보 리스트
+        List<UserCourse> userCourses = userCourseRepository.findUserCoursesByCourse(saveLocations);
+
+        List<UserLocationRes> userLocationResList = new ArrayList<>();
+        for (UserCourse userCourse : userCourses) {
+            Location location = userCourse.getLocation();
+            UserLocationRes userLocationRes = new UserLocationRes(location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
+            userLocationResList.add(userLocationRes);
+        }
+
+        return (userLocationResList);
+    }
+
+    // 코스 관광지 목록 조회
+    public List<UserLocationRes> getCourseLocationList(Course course) {
+
+        // 저장한 관광지 정보 리스트
+        List<UserCourse> userCourses = userCourseRepository.findUserCoursesByCourse(course);
+
+        List<UserLocationRes> userLocationResList = new ArrayList<>();
+        for (UserCourse userCourse : userCourses) {
+            Location location = userCourse.getLocation();
+            UserLocationRes userLocationRes = new UserLocationRes(location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
+            userLocationResList.add(userLocationRes);
+        }
+
+        return (userLocationResList);
     }
 }
