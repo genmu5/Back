@@ -17,11 +17,11 @@ public class DetailedInformationService {
     private final LocationRepository locationRepository;
     private final DisabledRepository disabledRepository;
 
-    public MapLocationResponse getLocationDetailed(Long contetntId){
+    public DetailedInformationResponse getLocationDetailed(Long contetntId){
         Location location = locationRepository.findLocationByContentId(contetntId);
         Disabled disabled = disabledRepository.findDisabledByLocation(location);
 
-        return new MapLocationResponse(location, disabled);
+        return new DetailedInformationResponse(location, disabled);
     }
 
 }
