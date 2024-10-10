@@ -14,7 +14,7 @@ public class DetailedInformationController {
     private final DetailedInformationService detailedInformationService;
 
     @GetMapping("/detail")
-    public MapLocationResponse getDetailedInformation(@RequestParam long contentid) {
+    public DetailedInformationResponse getDetailedInformation(@RequestParam long contentid) {
         return detailedInformationService.getLocationDetailed(contentid);
     }
 }
