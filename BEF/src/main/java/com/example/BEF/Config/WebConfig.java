@@ -1,4 +1,4 @@
-package com.example.BEF.WebConfig;
+package com.example.BEF.Config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

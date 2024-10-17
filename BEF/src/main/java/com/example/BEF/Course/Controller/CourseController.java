@@ -9,6 +9,13 @@ import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
 import com.example.BEF.User.Domain.User;
 import com.example.BEF.User.Service.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +27,7 @@ import java.util.List;
 @RequestMapping("/course")
 @Controller
 @RequiredArgsConstructor
+@Tag(name = "Course", description = "코스 관련 API")
 public class CourseController {
 
     private final CourseService courseService;
@@ -29,6 +37,16 @@ public class CourseController {
 
     // 코스 리스트 생성 API
     @PostMapping("/{userNumber}/create")
+    @Operation(summary = "코스 리스트 생성", description = "코스 리스트 생성 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코스 생성에 성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameters({
+            @Parameter(name = "userNumber", description = "유저 번호", example = "32"),
+            @Parameter(name = "name", description = "코스명", example = "제주도 2박 3일"),
+            @Parameter(name = "description", description = "코스 설명", example = "24.10.17~24.10.19")
+    })
     public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("userNumber") Long userNumber, @RequestParam("name") String name, @RequestParam("description") String description) {
         // 유저 조회
         User user = userRepository.findUserByUserNumber(userNumber);
@@ -43,6 +61,15 @@ public class CourseController {
 
     // 코스 리스트 삭제 API
     @DeleteMapping("/{userNumber}/delete")
+    @Operation(summary = "코스 리스트 삭제", description = "코스 리스트 삭제 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코스 삭제에 성공하였습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameters({
+            @Parameter(name = "userNumber", description = "유저 번호", example = "32"),
+            @Parameter(name = "courseNumber", description = "코스 번호", example = "25")
+    })
     public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("userNumber") Long userNumber, @RequestParam("courseNumber") Long courseNumber) {
         // 유저 및 코스 조회
         User user = userRepository.findUserByUserNumber(userNumber);
@@ -58,6 +85,12 @@ public class CourseController {
 
     // 코스 장소 추가 API
     @PostMapping("/{courseNumber}/add")
+    @Operation(summary = "코스에 장소 추가", description = "코스 장소 추가 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코스에 장소를 추가했습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 코스 또는 관광지입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameter(name = "courseNumber", description = "코스 번호", example = "25")
     public ResponseEntity<CourseLocRes> addLocation(@PathVariable("courseNumber") Long courseNumber, @RequestBody CourseAddReq courseAddReq) {
         // 코스 및 관광지 조회
         Course course = courseRepository.findCourseByCourseNumber(courseNumber);
@@ -85,6 +118,12 @@ public class CourseController {
 
     // 나의 코스 목록 조회 API
     @GetMapping("/{userNumber}")
+    @Operation(summary = "나의 코스 목록 조회", description = "나의 코스 목록 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "나의 코스 목록을 조회했습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
     public ResponseEntity<List<CourseInfoRes>> getCourses(@PathVariable("userNumber") Long userNumber) {
         // 유저 조회
         User user = userRepository.findUserByUserNumber(userNumber);
@@ -98,6 +137,15 @@ public class CourseController {
 
     // 관광지 저장 API
     @PostMapping("/save")
+    @Operation(summary = "관광지 저장", description = "관광지 저장 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "관광지를 저장했습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 관광지입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameters({
+            @Parameter(name = "userNumber", description = "유저 번호", example = "32"),
+            @Parameter(name = "contentId", description = "관광지 번호", example = "126510")
+    })
     public ResponseEntity<CourseSaveRes> saveLocation(@RequestParam("userNumber") Long userNumber, @RequestParam("contentId") Long contentId) {
         // 유저 및 관광지 조회
         User user = userRepository.findUserByUserNumber(userNumber);
@@ -112,6 +160,12 @@ public class CourseController {
 
     // 저장한 관광지 조회 API
     @GetMapping("/save/{userNumber}")
+    @Operation(summary = "저장한 관광지 조회", description = "저장한 관광지 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "저장한 관광지를 조회했습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
     public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("userNumber") Long userNumber) {
         // 유저 조회
         User user = userRepository.findUserByUserNumber(userNumber);
@@ -125,6 +179,12 @@ public class CourseController {
 
     // 코스 관광지 조회 API
     @GetMapping("/{courseNumber}/list")
+    @Operation(summary = "코스 관광지 조회", description = "코스 관광지 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코스 관광지를 조회했습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameter(name = "courseNumber", description = "코 번호", example = "32")
     public ResponseEntity<CourseLocationRes> CourseLocationList(@PathVariable("courseNumber") Long courseNumber) {
         // 유저 조회
         Course course = courseRepository.findCourseByCourseNumber(courseNumber);
