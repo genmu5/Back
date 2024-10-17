@@ -1,4 +1,4 @@
-package com.example.BEF.VoiceSearch.DTO;
+package com.example.BEF.Search.DTO;
 
 import lombok.Data;
 

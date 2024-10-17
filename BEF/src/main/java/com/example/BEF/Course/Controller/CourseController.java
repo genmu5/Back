@@ -1,16 +1,15 @@
 package com.example.BEF.Course.Controller;
 
+import com.example.BEF.Course.Service.CourseService;
 import com.example.BEF.Course.DTO.*;
 import com.example.BEF.Course.Domain.Course;
-import com.example.BEF.Course.Service.CourseRepository;
-import com.example.BEF.Course.Service.CourseService;
-import com.example.BEF.Location.DTO.LocationInfoRes;
+import com.example.BEF.Course.Repository.CourseRepository;
 import com.example.BEF.Location.DTO.UserLocationRes;
 import com.example.BEF.Location.Domain.Location;
-import com.example.BEF.Location.Service.LocationRepository;
+import com.example.BEF.Location.Repository.LocationRepository;
 import com.example.BEF.User.Domain.User;
 import com.example.BEF.User.Service.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,18 +19,13 @@ import java.util.List;
 
 @RequestMapping("/course")
 @Controller
+@RequiredArgsConstructor
 public class CourseController {
-    @Autowired
-    CourseService courseService;
 
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    LocationRepository locationRepository;
-
-    @Autowired
-    CourseRepository courseRepository;
+    private final CourseService courseService;
+    private final UserRepository userRepository;
+    private final LocationRepository locationRepository;
+    private final CourseRepository courseRepository;
 
     // 코스 리스트 생성 API
     @PostMapping("/{userNumber}/create")

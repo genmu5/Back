@@ -1,21 +1,19 @@
 package com.example.BEF.User.Service;
 
 import com.example.BEF.Course.Domain.Course;
-import com.example.BEF.Course.Service.CourseRepository;
+import com.example.BEF.Course.Repository.CourseRepository;
 import com.example.BEF.User.DTO.UserDisabledDTO;
 import com.example.BEF.User.DTO.UserJoinReq;
 import com.example.BEF.User.DTO.UserJoinRes;
 import com.example.BEF.User.Domain.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    CourseRepository courseRepository;
+    private final UserRepository userRepository;
+    private final CourseRepository courseRepository;
 
     public UserJoinRes saveUser(UserJoinReq userJoinReq) {
         // 저장할 유저 생성

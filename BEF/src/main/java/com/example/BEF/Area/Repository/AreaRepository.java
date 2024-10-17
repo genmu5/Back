@@ -1,4 +1,4 @@
-package com.example.BEF.Area.Service;
+package com.example.BEF.Area.Repository;
 
 import com.example.BEF.Area.Domain.Area;
 import org.springframework.data.jpa.repository.JpaRepository;

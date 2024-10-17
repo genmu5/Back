@@ -1,16 +1,18 @@
 package com.example.BEF.Location.Service;
 
 import com.example.BEF.Disabled.Domain.Disabled;
-import com.example.BEF.Disabled.Service.DisabledRepository;
+import com.example.BEF.Disabled.Repository.DisabledRepository;
 import com.example.BEF.Disabled.Service.DisabledService;
+import com.example.BEF.Location.DTO.DetailedInformationResponse;
 import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.Domain.Location;
+import com.example.BEF.Location.Repository.LocationRepository;
 import com.example.BEF.User.DTO.UserDisabledDTO;
 import com.example.BEF.User.Domain.User;
 import com.example.BEF.User.Service.UserRepository;
 import com.example.BEF.User.Service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,22 +21,15 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class LocationService {
-    @Autowired
-    UserService userService;
 
-    @Autowired
-    DisabledService disabledService;
-
-    @Autowired
-    DisabledRepository disabledRepository;
-
-    @Autowired
-    LocationRepository locationRepository;
-
-    @Autowired
-    UserRepository userRepository;
+    private final UserService userService;
+    private final  DisabledService disabledService;
+    private final UserRepository userRepository;
+    private final LocationRepository locationRepository;
+    private final DisabledRepository disabledRepository;
 
     // 관광지 필터링 - 유저 장애 정보 관련
     public List<LocationInfoRes> filteringLocations(Long userNumber) {
@@ -94,5 +89,12 @@ public class LocationService {
         }
 
         return (locationInfoResList);
+    }
+
+    public DetailedInformationResponse getLocationDetailed(Long contetntId){
+        Location location = locationRepository.findLocationByContentId(contetntId);
+        Disabled disabled = disabledRepository.findDisabledByLocation(location);
+
+        return new DetailedInformationResponse(location, disabled);
     }
 }

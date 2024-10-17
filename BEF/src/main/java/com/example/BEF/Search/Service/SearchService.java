@@ -1,15 +1,17 @@
-package com.example.BEF.VoiceSearch.Service;
+package com.example.BEF.Search.Service;
 
 import com.example.BEF.Disabled.Domain.Disabled;
-import com.example.BEF.Disabled.Service.DisabledRepository;
+import com.example.BEF.Disabled.Repository.DisabledRepository;
 import com.example.BEF.Location.Domain.Location;
-import com.example.BEF.MapLocation.DTO.MapLocationResponse;
-import com.example.BEF.VoiceSearch.Config.OpenAIClientConfig;
-import com.example.BEF.VoiceSearch.DTO.TranscriptionRequest;
-import com.example.BEF.VoiceSearch.DTO.WhisperTranscriptionRequest;
-import com.example.BEF.VoiceSearch.DTO.WhisperTranscriptionResponse;
-import com.example.BEF.VoiceSearch.Client.OpenAIClient;
-import com.example.BEF.VoiceSearch.Repository.DescriptionRepository;
+import com.example.BEF.Location.DTO.MapLocationResponse;
+import com.example.BEF.Location.Repository.LocationRepository;
+import com.example.BEF.Search.Client.OpenAIClient;
+import com.example.BEF.Search.Config.OpenAIClientConfig;
+import com.example.BEF.Search.DTO.TranscriptionRequest;
+import com.example.BEF.Search.DTO.WhisperTranscriptionRequest;
+import com.example.BEF.Search.DTO.WhisperTranscriptionResponse;
+import com.example.BEF.Search.Repository.SearchRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +20,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Service
-public class OpenAIClientService {
-
+@RequiredArgsConstructor
+@Transactional
+public class SearchService {
+    private final SearchRepository searchRepository;
+    private final DisabledRepository disabledRepository;
     private final OpenAIClient openAIClient;
     private final OpenAIClientConfig openAIClientConfig;
-    private final DescriptionRepository descriptionRepository;
-    private final DisabledRepository disabledRepository;
+    private final LocationRepository locationRepository;
+
+    public List<MapLocationResponse> findByKeyword(String keyword) {
+
+        System.out.println("Received keyword: " + keyword);
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new IllegalArgumentException("Keyword cannot be null or empty");
+        }
+        List<Location> locations = searchRepository.findByKeyword(keyword);
+
+        return locations.stream()
+                .map(location -> {
+                    Disabled disabled = disabledRepository.findDisabledByLocation(location);
+
+                    return new MapLocationResponse(location, disabled);
+                })
+                .collect(Collectors.toList());
+    }
 
     public WhisperTranscriptionResponse createTranscription(TranscriptionRequest transcriptionRequest){
         WhisperTranscriptionRequest whisperTranscriptionRequest = WhisperTranscriptionRequest.builder()
@@ -49,7 +70,7 @@ public class OpenAIClientService {
         String keyword = filterTranscription(transcribedText);
 
         if (keyword != null) {
-            List<Location> locations = descriptionRepository.findDescription(keyword);
+            List<Location> locations = locationRepository.findDescription(keyword);
 
             // Location 리스트를 MapLocationResponse 리스트로 변환
             return locations.stream()
@@ -61,5 +82,9 @@ public class OpenAIClientService {
         } else {
             return new ArrayList<>();  // 키워드가 없을 경우 빈 리스트 반환
         }
+    }
+
+    public List<Location> findLocationWithRadius(double lat, double lng){
+        return searchRepository.findLocationsWithinRadius(lat, lng);
     }
 }

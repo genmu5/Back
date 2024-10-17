@@ -1,4 +1,4 @@
-package com.example.BEF.Course.Service;
+package com.example.BEF.Course.Repository;
 
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Domain.UserCourse;

@@ -1,14 +1,13 @@
 package com.example.BEF.Data.Service;
 
 import com.example.BEF.Area.Domain.Area;
-import com.example.BEF.Area.Service.AreaRepository;
+import com.example.BEF.Area.Repository.AreaRepository;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -20,15 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SettingAreaService {
+
     @Value("${openapi.service-key}")
     private String serviceKey;
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    AreaRepository areaRepository;
+    private final AreaRepository areaRepository;
 
     String defaultURL = "https://apis.data.go.kr/B551011/KorWithService1/";
     String defaultURL2 = "&MobileOS=IOS&MobileApp=BEF&_type=json";

@@ -1,9 +1,10 @@
 package com.example.BEF.Location.Controller;
 
+import com.example.BEF.Location.DTO.DetailedInformationResponse;
 import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.Service.LocationService;
 import com.example.BEF.User.Service.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,13 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/location")
+@RequiredArgsConstructor
+@RequestMapping("/api/location")
 public class LocationController {
-    @Autowired
-    LocationService locationService;
-
-    @Autowired
-    UserRepository userRepository;
+    private final LocationService locationService;
+    private final UserRepository userRepository;
 
     // 유저 장애 정보 기반 관광지 리스트 검색
     @GetMapping("/recommend")
@@ -42,5 +41,10 @@ public class LocationController {
 
         // 필터링된 관광지 리스트 리턴
         return new ResponseEntity<>(locationService.findLocationWithDistrict(state, city), HttpStatus.OK);
+    }
+
+    @GetMapping("/detail")
+    public DetailedInformationResponse getDetailedInformation(@RequestParam long contentid) {
+        return locationService.getLocationDetailed(contentid);
     }
 }
