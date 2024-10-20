@@ -23,7 +23,7 @@ public class UserJoinReq {
     private Boolean hearingHandicap;
     @Schema(description = "영유아 가족 여부")
     private Boolean infantsFamily;
-    @Schema(description = "선호하는 여행 타입", example = "forest, ocean, culture, outside")
+    @Schema(description = "선호하는 여행 타입, forest, ocean, history, outside 중 복수 개를 문자열 리스트 형태로 요청", example = "forest, ocean, history, outside")
     private List<String> travelType;
 
     public boolean validJoin() {

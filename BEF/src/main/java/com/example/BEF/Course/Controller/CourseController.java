@@ -42,12 +42,8 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "코스 생성에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameters({
-            @Parameter(name = "userNumber", description = "유저 번호", example = "32"),
-            @Parameter(name = "name", description = "코스명", example = "제주도 2박 3일"),
-            @Parameter(name = "description", description = "코스 설명", example = "24.10.17~24.10.19")
-    })
-    public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("userNumber") Long userNumber, @RequestParam("name") String name, @RequestParam("description") String description) {
+    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("userNumber") Long userNumber, @RequestBody CreateCourseReq createCourseReq) {
         // 유저 조회
         User user = userRepository.findUserByUserNumber(userNumber);
 
@@ -56,7 +52,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         // 코스 생성
-        return ResponseEntity.status(HttpStatus.OK).body(courseService.createUserCourse(user, name, description));
+        return ResponseEntity.status(HttpStatus.OK).body(courseService.createUserCourse(user, createCourseReq));
     }
 
     // 코스 리스트 삭제 API
@@ -66,14 +62,11 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "코스 삭제에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameters({
-            @Parameter(name = "userNumber", description = "유저 번호", example = "32"),
-            @Parameter(name = "courseNumber", description = "코스 번호", example = "25")
-    })
-    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("userNumber") Long userNumber, @RequestParam("courseNumber") Long courseNumber) {
+    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("userNumber") Long userNumber, @RequestBody DeleteCourseReq deleteCourseReq) {
         // 유저 및 코스 조회
         User user = userRepository.findUserByUserNumber(userNumber);
-        Course course = courseRepository.findCourseByCourseNumber(courseNumber);
+        Course course = courseRepository.findCourseByCourseNumber(deleteCourseReq.getCourseNumber());
 
         // 존재하지 않는 유저일 때
         if (user == null || course == null)
@@ -91,7 +84,7 @@ public class CourseController {
             @ApiResponse(responseCode = "400", description = "존재하지 않는 코스 또는 관광지입니다.", content = @Content(mediaType = "application/json")),
     })
     @Parameter(name = "courseNumber", description = "코스 번호", example = "25")
-    public ResponseEntity<CourseLocRes> addLocation(@PathVariable("courseNumber") Long courseNumber, @RequestBody CourseAddReq courseAddReq) {
+    public ResponseEntity<CourseLocRes> addLocation(@PathVariable("courseNumber") Long courseNumber, @RequestBody CourseAddLocReq courseAddLocReq) {
         // 코스 및 관광지 조회
         Course course = courseRepository.findCourseByCourseNumber(courseNumber);
 
@@ -99,22 +92,34 @@ public class CourseController {
         if (course == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
-        return ResponseEntity.status(HttpStatus.OK).body(courseService.addLocToCourse(course, courseAddReq.getContentIdList()));
+        return ResponseEntity.status(HttpStatus.OK).body(courseService.addLocToCourse(course, courseAddLocReq.getContentIdList()));
     }
 
     // 코스 장소 삭제 API - 수정 필요
-//    @DeleteMapping("/{courseNumber}/delete/{contentId}")
-//    public ResponseEntity<CourseLocRes> delLocation(@PathVariable("courseNumber") Long courseNumber, @PathVariable("contentId") Long contentId) {
-//        // 코스 및 관광지 조회
-//        Course course = courseRepository.findCourseByCourseNumber(courseNumber);
-//        Location location = locationRepository.findLocationByContentId(contentId);
-//
-//        // 존재하지 않는 코스 및 관광지일 때
-//        if (course == null || location == null)
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(courseService.delLocToCourse(course, location));
-//    }
+    @DeleteMapping("/{courseNumber}/delete/{contentId}")
+    @Operation(summary = "코스에 장소 삭제", description = "코스 장소 삭제 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코스에 장소를 삭제했습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 코스 또는 관광지입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameters({
+            @Parameter(name = "courseNumber", description = "코스 번호", example = "25"),
+            @Parameter(name = "contentId", description = "관광지 번호", example = "125551")
+    })
+    public ResponseEntity<String> delLocation(@PathVariable("courseNumber") Long courseNumber, @PathVariable("contentId") Long contentId) {
+        // 코스 및 관광지 조회
+        Course course = courseRepository.findCourseByCourseNumber(courseNumber);
+        Location location = locationRepository.findLocationByContentId(contentId);
+
+        // 존재하지 않는 코스 및 관광지일 때
+        if (course == null || location == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        // 코스에서 관광지 삭제
+        courseService.delLocToCourse(course, location);
+
+        return ResponseEntity.status(HttpStatus.OK).body(course.getCourseName() + " 코스에서 " + location.getContentTitle() + " 관광지를 제거했습니다.");
+    }
 
     // 나의 코스 목록 조회 API
     @GetMapping("/{userNumber}")
@@ -142,14 +147,10 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "관광지를 저장했습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 관광지입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameters({
-            @Parameter(name = "userNumber", description = "유저 번호", example = "32"),
-            @Parameter(name = "contentId", description = "관광지 번호", example = "126510")
-    })
-    public ResponseEntity<CourseSaveRes> saveLocation(@RequestParam("userNumber") Long userNumber, @RequestParam("contentId") Long contentId) {
+    public ResponseEntity<CourseSaveRes> saveLocation(@RequestBody SaveLocationReq saveLocationReq) {
         // 유저 및 관광지 조회
-        User user = userRepository.findUserByUserNumber(userNumber);
-        Location location = locationRepository.findLocationByContentId(contentId);
+        User user = userRepository.findUserByUserNumber(saveLocationReq.getUserNumber());
+        Location location = locationRepository.findLocationByContentId(saveLocationReq.getContentId());
 
         // 존재하지 않는 관광지일 때
         if (location == null || user == null)
@@ -184,7 +185,7 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "코스 관광지를 조회했습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "courseNumber", description = "코 번호", example = "32")
+    @Parameter(name = "courseNumber", description = "코스 번호", example = "32")
     public ResponseEntity<CourseLocationRes> CourseLocationList(@PathVariable("courseNumber") Long courseNumber) {
         // 유저 조회
         Course course = courseRepository.findCourseByCourseNumber(courseNumber);
