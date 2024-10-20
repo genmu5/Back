@@ -1,18 +1,17 @@
 package com.example.BEF.Data.Service;
 
-import com.example.BEF.Area.Service.AreaRepository;
+import com.example.BEF.Area.Repository.AreaRepository;
 import com.example.BEF.Disabled.Domain.Disabled;
-import com.example.BEF.Disabled.Service.DisabledRepository;
+import com.example.BEF.Disabled.Repository.DisabledRepository;
 import com.example.BEF.Location.Domain.Location;
-import com.example.BEF.Location.Service.LocationRepository;
+import com.example.BEF.Location.Repository.LocationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -25,23 +24,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SettingLocationService {
     private static final Logger log = LoggerFactory.getLogger(SettingLocationService.class);
 
     @Value("${openapi.service-key2}")
     private String serviceKey;
 
-    @Autowired
-    private LocationRepository locationRepository;
-
-    @Autowired
-    private DisabledRepository disabledRepository;
-
-    @Autowired
-    private AreaRepository areaRepository;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
+    private final LocationRepository locationRepository;
+    private final DisabledRepository disabledRepository;
+    private final AreaRepository areaRepository;
 
     String defaultURL = "https://apis.data.go.kr/B551011/KorWithService1/";
     String defaultURL2 = "&MobileOS=IOS&MobileApp=BEF&_type=json";
@@ -57,10 +49,10 @@ public class SettingLocationService {
 
     public void setLocations(String areaCode, String page, List<Location> locationList){
 
-        String area = "&areaCode=" + areaCode; // 지역
+        String area = "&areaCode=" + areaCode; // 지역 코드
         String pageNum = "&pageNo=" + page; // 페이지
-        String row = "&numOfRows=100"; // 데이터 개수 : 10
-        String service = "&serviceKey=" + serviceKey;
+        String row = "&numOfRows=100"; // 페이지 당 데이터 수 : 100
+        String service = "&serviceKey=" + serviceKey; // 서비스키
 
         ObjectMapper objectMapper = new ObjectMapper();
         StringBuffer result = new StringBuffer();
@@ -94,8 +86,8 @@ public class SettingLocationService {
                 // Location 엔티티 생성
                 location.setArea(areaRepository.findByAreaCode(item.getLong("areacode")));
 
-                // Location 설명, 전화번호 추가
-                setDescriptionAndPhoneNumber(location);
+                // Location 설명 추가
+                setDescription(location);
 
                 // 리스트에 추가
                 locationList.add(location);
@@ -110,7 +102,7 @@ public class SettingLocationService {
         }
     }
 
-    public void setDescriptionAndPhoneNumber(Location location) {
+    public void setDescription(Location location) {
 
         String service = "&serviceKey=" + serviceKey;
         Long contentId = location.getContentId();
@@ -139,17 +131,15 @@ public class SettingLocationService {
             JSONObject infoResponseBody = infoJsonResponse.getJSONObject("response").getJSONObject("body");
             JSONObject infoItem = infoResponseBody.getJSONObject("items").getJSONArray("item").getJSONObject(0);
 
-//            String phone = infoItem.getString("tel");
             String description = infoItem.optString("overview", "설명 없음");
             if (description.length() > 255) {
                 description = description.substring(0, 255);
             }
 
             location.setDescription(description);
-//            location.setPhoneNumber(phone);
         }
         catch (IOException e) {
-            log.error("An error occurred while parsing and saving Desciption And PhoneNumber data: ", e);
+            log.error("An error occurred while parsing and saving Desciption data: ", e);
         }
     }
 

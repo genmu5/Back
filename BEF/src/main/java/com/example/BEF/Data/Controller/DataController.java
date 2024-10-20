@@ -2,21 +2,19 @@ package com.example.BEF.Data.Controller;
 
 import com.example.BEF.Data.Service.SettingAreaService;
 import com.example.BEF.Data.Service.SettingLocationService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/data")
 @Slf4j
+@RequiredArgsConstructor
 public class DataController {
 
-    @Autowired
-    private SettingAreaService settingAreaService;
-
-    @Autowired
-    private SettingLocationService settingLocationService;
+    private final SettingAreaService settingAreaService;
+    private final SettingLocationService settingLocationService;
 
     @PostMapping("/area")
     public String saveAreas() {
