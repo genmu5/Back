@@ -27,8 +27,13 @@ public class Course {
     @JoinColumn(name = "user_number")
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uuid", referencedColumnName = "uuid") // User의 uuid 필드를 참조
+    private User uuidUser;
+
     public Course(User user, String courseName, String description) {
         this.user = user;
+        this.uuidUser = user;
         this.courseName = courseName;
         this.description = description;
     }
