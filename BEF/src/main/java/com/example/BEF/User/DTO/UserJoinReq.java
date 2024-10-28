@@ -25,6 +25,8 @@ public class UserJoinReq {
     private Boolean infantsFamily;
     @Schema(description = "선호하는 여행 타입, forest, ocean, history, outside 중 복수 개를 문자열 리스트 형태로 요청", example = "forest, ocean, history, outside")
     private List<String> travelType;
+    @Schema(description = "uuid")
+    private String uuid;
 
     public boolean validJoin() {
         if (userName == null || userName.isBlank())
@@ -41,6 +43,10 @@ public class UserJoinReq {
             return false;
         else if (hearingHandicap == null)
             return false;
-        else return infantsFamily != null;
+        else if (infantsFamily == null)
+            return false;
+        else
+            return !(uuid == null || uuid.isBlank());
+//        else return infantsFamily != null;
     }
 }

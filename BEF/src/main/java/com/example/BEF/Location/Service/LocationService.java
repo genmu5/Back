@@ -32,12 +32,11 @@ public class LocationService {
     private final DisabledRepository disabledRepository;
 
     // 관광지 필터링 - 유저 장애 정보 관련
-    public List<LocationInfoRes> filteringLocations(Long userNumber) {
+    public List<LocationInfoRes> filteringLocations(User user) {
         // 필터링된 관광지 리스트
         List<LocationInfoRes> locationInfoResList = new ArrayList<>();
 
         // 여행 타입별 단어 리스트
-        User user = userRepository.findUserByUserNumber(userNumber);
         List<String> userType = new ArrayList<>();
 
         if (user.getForest())
@@ -50,7 +49,8 @@ public class LocationService {
             userType.addAll(Arrays.asList("가족", "어린이", "공원", "파크", "레저"));
 
         // 유저 장애 정보
-        UserDisabledDTO userDisabledDTO = userService.settingUserDisabled(userNumber);
+//        UserDisabledDTO userDisabledDTO = userService.settingUserDisabled(userNumber);
+        UserDisabledDTO userDisabledDTO = userService.settingUserDisabled(user.getUuid());
 
         // 필터링 된 관광지 장애 정보 리스트
         Set<Disabled> filteredDisabledList = disabledService.filterByUserDisabilityAndTravelType(userDisabledDTO, userType);

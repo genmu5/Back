@@ -21,6 +21,12 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<Course> courseList;
 
+    @OneToMany(mappedBy = "uuidUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Course> courseListByUuid;
+
+    @Column(name = "uuid")
+    private String uuid;
+
     @Column(name = "user_name")
     private String userName;      // 유저 이름
 
@@ -57,7 +63,8 @@ public class User {
     @Column(name = "outside")
     private Boolean outside;
 
-    public User(String userName, String gender, Long age, Boolean senior, Boolean wheelchair, Boolean blindHandicap, Boolean hearingHandicap, Boolean infantsFamily) {
+    public User(String userName, String gender, Long age, Boolean senior, Boolean wheelchair,
+                Boolean blindHandicap, Boolean hearingHandicap, Boolean infantsFamily, String uuid) {
         this.userName = userName;
         this.gender = gender;
         this.age = age;
@@ -66,5 +73,6 @@ public class User {
         this.blindHandicap = blindHandicap;
         this.hearingHandicap = hearingHandicap;
         this.infantsFamily = infantsFamily;
+        this.uuid = uuid;
     }
 }

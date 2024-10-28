@@ -32,6 +32,7 @@ public class UserService {
         savedUser.setBlindHandicap(userJoinReq.getBlindHandicap());
         savedUser.setHearingHandicap(userJoinReq.getHearingHandicap());
         savedUser.setInfantsFamily(userJoinReq.getInfantsFamily());
+        savedUser.setUuid(userJoinReq.getUuid()); // uuid
 
         // 유저 여행 타입 설정
         savedUser.setForest(userJoinReq.getTravelType().contains("forest"));
@@ -47,11 +48,14 @@ public class UserService {
         courseRepository.save(saveCourse);
 
         // 유저 정보 리턴
-        return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName()));
+//        return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName())); // uuid
+        return (new UserJoinRes(savedUser.getUserName(), savedUser.getUuid())); // uuid
     }
 
-    public UserDisabledDTO settingUserDisabled(Long userNumber) {
-        User disabledUser = userRepository.findUserByUserNumber(userNumber);
+//    public UserDisabledDTO settingUserDisabled(Long userNumber) {
+    public UserDisabledDTO settingUserDisabled(String uuid) {
+//        User disabledUser = userRepository.findUserByUserNumber(userNumber);
+        User disabledUser = userRepository.findUserByUuid(uuid);
 
         return (new UserDisabledDTO(disabledUser.getSenior(), disabledUser.getWheelchair(),
                 disabledUser.getBlindHandicap(), disabledUser.getHearingHandicap(), disabledUser.getInfantsFamily()));

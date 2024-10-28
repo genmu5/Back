@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/course")
+@RequestMapping("/api/course")
 @Controller
 @RequiredArgsConstructor
 @Tag(name = "Course", description = "코스 관련 API")
@@ -36,16 +36,20 @@ public class CourseController {
     private final CourseRepository courseRepository;
 
     // 코스 리스트 생성 API
-    @PostMapping("/{userNumber}/create")
+//    @PostMapping("/{userNumber}/create")
+    @PostMapping("/{uuid}/create")
     @Operation(summary = "코스 리스트 생성", description = "코스 리스트 생성 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "코스 생성에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("userNumber") Long userNumber, @RequestBody CreateCourseReq createCourseReq) {
+//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    @Parameter(name = "uuid", description = "uuid", example = "32")
+//    public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("userNumber") Long userNumber, @RequestBody CreateCourseReq createCourseReq) {
+    public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("uuid") String uuid, @RequestBody CreateCourseReq createCourseReq) {
         // 유저 조회
-        User user = userRepository.findUserByUserNumber(userNumber);
+//        User user = userRepository.findUserByUserNumber(userNumber);
+        User user = userRepository.findUserByUuid(uuid);
 
         // 존재하지 않는 유저일 때
         if (user == null)
@@ -56,16 +60,20 @@ public class CourseController {
     }
 
     // 코스 리스트 삭제 API
-    @DeleteMapping("/{userNumber}/delete")
+//    @DeleteMapping("/{userNumber}/delete")
+    @DeleteMapping("/{uuid}/delete")
     @Operation(summary = "코스 리스트 삭제", description = "코스 리스트 삭제 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "코스 삭제에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("userNumber") Long userNumber, @RequestBody DeleteCourseReq deleteCourseReq) {
+//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    @Parameter(name = "uuid", description = "uuid", example = "32")
+//    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("userNumber") Long userNumber, @RequestBody DeleteCourseReq deleteCourseReq) {
+    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("uuid") String uuid, @RequestBody DeleteCourseReq deleteCourseReq) {
         // 유저 및 코스 조회
-        User user = userRepository.findUserByUserNumber(userNumber);
+//        User user = userRepository.findUserByUserNumber(userNumber);
+        User user = userRepository.findUserByUuid(uuid);
         Course course = courseRepository.findCourseByCourseNumber(deleteCourseReq.getCourseNumber());
 
         // 존재하지 않는 유저일 때
@@ -122,16 +130,20 @@ public class CourseController {
     }
 
     // 나의 코스 목록 조회 API
-    @GetMapping("/{userNumber}")
+//    @GetMapping("/{userNumber}")
+    @GetMapping("/{uuid}")
     @Operation(summary = "나의 코스 목록 조회", description = "나의 코스 목록 조회 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "나의 코스 목록을 조회했습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    public ResponseEntity<List<CourseInfoRes>> getCourses(@PathVariable("userNumber") Long userNumber) {
+//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    @Parameter(name = "uuid", description = "uuid", example = "32")
+//    public ResponseEntity<List<CourseInfoRes>> getCourses(@PathVariable("userNumber") Long userNumber) {
+    public ResponseEntity<List<CourseInfoRes>> getCourses(@PathVariable("uuid") String uuid) {
         // 유저 조회
-        User user = userRepository.findUserByUserNumber(userNumber);
+//        User user = userRepository.findUserByUserNumber(userNumber);
+        User user = userRepository.findUserByUuid(uuid);
 
         // 존재하지 않는 유저일 때
         if (user == null)
@@ -149,7 +161,8 @@ public class CourseController {
     })
     public ResponseEntity<CourseSaveRes> saveLocation(@RequestBody SaveLocationReq saveLocationReq) {
         // 유저 및 관광지 조회
-        User user = userRepository.findUserByUserNumber(saveLocationReq.getUserNumber());
+//        User user = userRepository.findUserByUserNumber(saveLocationReq.getUserNumber());
+        User user = userRepository.findUserByUuid(saveLocationReq.getUuid());
         Location location = locationRepository.findLocationByContentId(saveLocationReq.getContentId());
 
         // 존재하지 않는 관광지일 때
@@ -160,16 +173,20 @@ public class CourseController {
     }
 
     // 저장한 관광지 조회 API
-    @GetMapping("/save/{userNumber}")
+//    @GetMapping("/save/{userNumber}")
+    @GetMapping("/save/{uuid}")
     @Operation(summary = "저장한 관광지 조회", description = "저장한 관광지 조회 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "저장한 관광지를 조회했습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("userNumber") Long userNumber) {
+//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    @Parameter(name = "uuid", description = "uuid", example = "uuidTest")
+//    public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("userNumber") Long userNumber) {
+    public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("uuid") String uuid) {
         // 유저 조회
-        User user = userRepository.findUserByUserNumber(userNumber);
+//        User user = userRepository.findUserByUserNumber(userNumber);
+        User user = userRepository.findUserByUuid(uuid);
 
         // 존재하지 않는 유저일 때
         if (user == null)
