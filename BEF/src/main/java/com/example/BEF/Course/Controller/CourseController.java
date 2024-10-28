@@ -173,16 +173,20 @@ public class CourseController {
     }
 
     // 저장한 관광지 조회 API
-    @GetMapping("/save/{userNumber}")
+//    @GetMapping("/save/{userNumber}")
+    @GetMapping("/save/{uuid}")
     @Operation(summary = "저장한 관광지 조회", description = "저장한 관광지 조회 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "저장한 관광지를 조회했습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("userNumber") Long userNumber) {
+//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    @Parameter(name = "uuid", description = "uuid", example = "uuidTest")
+//    public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("userNumber") Long userNumber) {
+    public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("uuid") String uuid) {
         // 유저 조회
-        User user = userRepository.findUserByUserNumber(userNumber);
+//        User user = userRepository.findUserByUserNumber(userNumber);
+        User user = userRepository.findUserByUuid(uuid);
 
         // 존재하지 않는 유저일 때
         if (user == null)
