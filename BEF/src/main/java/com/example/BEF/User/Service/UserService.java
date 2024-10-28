@@ -48,7 +48,8 @@ public class UserService {
         courseRepository.save(saveCourse);
 
         // 유저 정보 리턴
-        return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName(), savedUser.getUuid())); // uuid
+//        return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName())); // uuid
+        return (new UserJoinRes(savedUser.getUserName(), savedUser.getUuid())); // uuid
     }
 
 //    public UserDisabledDTO settingUserDisabled(Long userNumber) {
