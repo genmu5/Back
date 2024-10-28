@@ -161,7 +161,8 @@ public class CourseController {
     })
     public ResponseEntity<CourseSaveRes> saveLocation(@RequestBody SaveLocationReq saveLocationReq) {
         // 유저 및 관광지 조회
-        User user = userRepository.findUserByUserNumber(saveLocationReq.getUserNumber());
+//        User user = userRepository.findUserByUserNumber(saveLocationReq.getUserNumber());
+        User user = userRepository.findUserByUuid(saveLocationReq.getUuid());
         Location location = locationRepository.findLocationByContentId(saveLocationReq.getContentId());
 
         // 존재하지 않는 관광지일 때
