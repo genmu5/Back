@@ -59,16 +59,19 @@ public class CourseController {
     }
 
     // 코스 리스트 삭제 API
-    @DeleteMapping("/{userNumber}/delete")
+//    @DeleteMapping("/{userNumber}/delete")
+    @DeleteMapping("/{uuid}/delete")
     @Operation(summary = "코스 리스트 삭제", description = "코스 리스트 삭제 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "코스 삭제에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
     @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("userNumber") Long userNumber, @RequestBody DeleteCourseReq deleteCourseReq) {
+//    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("userNumber") Long userNumber, @RequestBody DeleteCourseReq deleteCourseReq) {
+    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("uuid") String uuid, @RequestBody DeleteCourseReq deleteCourseReq) {
         // 유저 및 코스 조회
-        User user = userRepository.findUserByUserNumber(userNumber);
+//        User user = userRepository.findUserByUserNumber(userNumber);
+        User user = userRepository.findUserByUuid(uuid);
         Course course = courseRepository.findCourseByCourseNumber(deleteCourseReq.getCourseNumber());
 
         // 존재하지 않는 유저일 때
