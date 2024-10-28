@@ -32,6 +32,7 @@ public class UserService {
         savedUser.setBlindHandicap(userJoinReq.getBlindHandicap());
         savedUser.setHearingHandicap(userJoinReq.getHearingHandicap());
         savedUser.setInfantsFamily(userJoinReq.getInfantsFamily());
+        savedUser.setUuid(userJoinReq.getUuid()); // uuid
 
         // 유저 여행 타입 설정
         savedUser.setForest(userJoinReq.getTravelType().contains("forest"));
@@ -47,7 +48,7 @@ public class UserService {
         courseRepository.save(saveCourse);
 
         // 유저 정보 리턴
-        return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName()));
+        return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName(), savedUser.getUuid())); // uuid
     }
 
     public UserDisabledDTO settingUserDisabled(Long userNumber) {
