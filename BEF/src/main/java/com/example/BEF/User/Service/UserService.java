@@ -51,8 +51,10 @@ public class UserService {
         return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName(), savedUser.getUuid())); // uuid
     }
 
-    public UserDisabledDTO settingUserDisabled(Long userNumber) {
-        User disabledUser = userRepository.findUserByUserNumber(userNumber);
+//    public UserDisabledDTO settingUserDisabled(Long userNumber) {
+    public UserDisabledDTO settingUserDisabled(String uuid) {
+//        User disabledUser = userRepository.findUserByUserNumber(userNumber);
+        User disabledUser = userRepository.findUserByUuid(uuid);
 
         return (new UserDisabledDTO(disabledUser.getSenior(), disabledUser.getWheelchair(),
                 disabledUser.getBlindHandicap(), disabledUser.getHearingHandicap(), disabledUser.getInfantsFamily()));
