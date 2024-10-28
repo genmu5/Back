@@ -43,7 +43,8 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "코스 생성에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    @Parameter(name = "uuid", description = "uuid", example = "32")
 //    public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("userNumber") Long userNumber, @RequestBody CreateCourseReq createCourseReq) {
     public ResponseEntity<CourseInfoRes> createCourse(@PathVariable("uuid") String uuid, @RequestBody CreateCourseReq createCourseReq) {
         // 유저 조회
@@ -66,7 +67,8 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "코스 삭제에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    @Parameter(name = "uuid", description = "uuid", example = "32")
 //    public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("userNumber") Long userNumber, @RequestBody DeleteCourseReq deleteCourseReq) {
     public ResponseEntity<CourseInfoRes> deleteCourse(@PathVariable("uuid") String uuid, @RequestBody DeleteCourseReq deleteCourseReq) {
         // 유저 및 코스 조회
@@ -128,16 +130,20 @@ public class CourseController {
     }
 
     // 나의 코스 목록 조회 API
-    @GetMapping("/{userNumber}")
+//    @GetMapping("/{userNumber}")
+    @GetMapping("/{uuid}")
     @Operation(summary = "나의 코스 목록 조회", description = "나의 코스 목록 조회 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "나의 코스 목록을 조회했습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    public ResponseEntity<List<CourseInfoRes>> getCourses(@PathVariable("userNumber") Long userNumber) {
+//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    @Parameter(name = "uuid", description = "uuid", example = "32")
+//    public ResponseEntity<List<CourseInfoRes>> getCourses(@PathVariable("userNumber") Long userNumber) {
+    public ResponseEntity<List<CourseInfoRes>> getCourses(@PathVariable("uuid") String uuid) {
         // 유저 조회
-        User user = userRepository.findUserByUserNumber(userNumber);
+//        User user = userRepository.findUserByUserNumber(userNumber);
+        User user = userRepository.findUserByUuid(uuid);
 
         // 존재하지 않는 유저일 때
         if (user == null)
