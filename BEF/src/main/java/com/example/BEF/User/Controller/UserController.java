@@ -4,6 +4,7 @@ import com.example.BEF.User.DTO.UserJoinReq;
 import com.example.BEF.User.DTO.UserJoinRes;
 import com.example.BEF.User.Service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -41,10 +42,16 @@ public class UserController {
     }
 
     @GetMapping("/exist")
-    public ResponseEntity<String> existUser(@RequestParam("uuid") String uuid) {
-        if(!userService.existUser(uuid))
-            return ResponseEntity.status(HttpStatus.OK).body("해당 유저가 존재하지 않습니다.");
+    @Operation(summary = "유저 존재 여부 확인", description = "해당 유저 존재 여부 확인 API")
+    @Parameter(name = "uuid", description = "uuid", example = "finetuning0")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "true : 유저가 존재합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "false : 유저가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+    })
+    public ResponseEntity<Boolean> existUser(@RequestParam("uuid") String uuid) {
+        if(userService.existUser(uuid))
+            return ResponseEntity.status(HttpStatus.OK).body(true);
 
-        return ResponseEntity.status(HttpStatus.OK).body("해당 유저가 존재합니다.");
+        return ResponseEntity.status(HttpStatus.OK).body(false);
     }
 }
