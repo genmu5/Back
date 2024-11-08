@@ -60,4 +60,8 @@ public class UserService {
         return (new UserDisabledDTO(disabledUser.getSenior(), disabledUser.getWheelchair(),
                 disabledUser.getBlindHandicap(), disabledUser.getHearingHandicap(), disabledUser.getInfantsFamily()));
     }
+
+    public Boolean existUser(String uuid) {
+        return userRepository.existsByUuid(uuid);
+    }
 }
