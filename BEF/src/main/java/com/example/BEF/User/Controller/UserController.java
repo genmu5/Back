@@ -12,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,5 +38,13 @@ public class UserController {
         // 회원가입 성공시
         else
             return new ResponseEntity<>(savedUserJoinRes, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/exist")
+    public ResponseEntity<String> existUser(@RequestParam("uuid") String uuid) {
+        if(!userService.existUser(uuid))
+            return ResponseEntity.status(HttpStatus.OK).body("해당 유저가 존재하지 않습니다.");
+
+        return ResponseEntity.status(HttpStatus.OK).body("해당 유저가 존재합니다.");
     }
 }
