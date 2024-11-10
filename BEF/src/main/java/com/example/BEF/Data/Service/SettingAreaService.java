@@ -2,6 +2,7 @@ package com.example.BEF.Data.Service;
 
 import com.example.BEF.Area.Domain.Area;
 import com.example.BEF.Area.Repository.AreaRepository;
+import com.example.BEF.Util.JsonParsingUtil;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,11 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,39 +28,31 @@ public class SettingAreaService {
     private final AreaRepository areaRepository;
 
     String defaultURL = "https://apis.data.go.kr/B551011/KorWithService1/";
-    String defaultURL2 = "&MobileOS=IOS&MobileApp=BEF&_type=json";
+    String defaultParam = "&MobileOS=IOS&MobileApp=BEF&_type=json";
 
     private static final Logger log = LoggerFactory.getLogger(SettingAreaService.class);
 
     public void settingAreaData() {
 
-        String service = "&serviceKey=" + serviceKey;
+        StringBuilder result = new StringBuilder();
 
-        StringBuffer result = new StringBuffer();
+        // BaseURL
+        String baseApiUrl = defaultURL + "areaCode1?" + defaultParam;
+        // Param
+        String service = "&serviceKey=" + serviceKey;
+        String rowParam = "numOfRows=20";
 
         try {
             // API URL 설정
-            URL url = new URL(defaultURL + "areaCode1?" + service + defaultURL2 + "numOfRows=20");
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Content-type", "application/json");
+            URL url = new URI(baseApiUrl + service + rowParam).toURL();
+            JSONArray items = JsonParsingUtil.parsingJsonFromUrl(url, result);
 
-
-            // BufferedReader로 응답을 UTF-8로 읽어오기
-            BufferedReader bf = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), StandardCharsets.UTF_8));
-
-            String line;
-            while ((line = bf.readLine()) != null) {
-                result.append(line);
-            }
-
-            // JSON 파싱 (JSON 형태를 가정)
-            JSONObject jsonResponse = new JSONObject(result.toString());
-            JSONObject responseBody = jsonResponse.getJSONObject("response").getJSONObject("body");
-            JSONArray items = responseBody.getJSONObject("items").getJSONArray("item");
+            if (items == null)
+                return ;
 
             // 'code'와 'name' 추출
             List<Area> areaList = new ArrayList<>();
+
             for (int i = 0; i < items.length(); i++) {
                 JSONObject item = items.getJSONObject(i);
                 String code = item.getString("code");

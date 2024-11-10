@@ -5,79 +5,70 @@ import com.example.BEF.Disabled.Domain.Disabled;
 import com.example.BEF.Disabled.Repository.DisabledRepository;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
+import com.example.BEF.Util.JsonParsingUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SettingLocationService {
-    private static final Logger log = LoggerFactory.getLogger(SettingLocationService.class);
-
-    @Value("${openapi.service-key2}")
-    private String serviceKey;
-
     private final LocationRepository locationRepository;
     private final DisabledRepository disabledRepository;
     private final AreaRepository areaRepository;
 
-    String defaultURL = "https://apis.data.go.kr/B551011/KorWithService1/";
-    String defaultURL2 = "&MobileOS=IOS&MobileApp=BEF&_type=json";
-
-    public void setLocationAndDisabled(String areaCode, String page) {
+    @Value("${openapi.service-key}")
+    private String apiKey;
+    final String defaultURL = "https://apis.data.go.kr/B551011/KorWithService1/";
+    final String defaultParam = "&MobileOS=IOS&MobileApp=BEF&_type=json";
+    public void setLocationAndDisabled(String areaCode, String page, String contentTypeId) {
 
         List<Location> locationList = new ArrayList<>();
-        setLocations(areaCode, page, locationList);
+        setLocations(locationList, areaCode, page, contentTypeId);
 
         List<Disabled> disabledList = new ArrayList<>();
         setDisabled(locationList, disabledList);
     }
 
-    public void setLocations(String areaCode, String page, List<Location> locationList){
-
-        String area = "&areaCode=" + areaCode; // 지역 코드
-        String pageNum = "&pageNo=" + page; // 페이지
-        String row = "&numOfRows=100"; // 페이지 당 데이터 수 : 100
-        String service = "&serviceKey=" + serviceKey; // 서비스키
+    public void setLocations(List<Location> locationList, String areaCode, String page, String contentTypeId){
 
         ObjectMapper objectMapper = new ObjectMapper();
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
+
+        // Base URLs
+        String baseAPIUrl = defaultURL + "areaBasedList1?" + defaultParam;
+
+        // Query Parameters
+        String contentTypeParam = "&contentTypeId=" + contentTypeId;
+        String arrangeParam = "&arrange=R";
+        String areaParam = "&areaCode=" + areaCode;
+        String pageParam = "&pageNo=" + page;
+        String rowParam = "&numOfRows=100";
+
+        // Service key
+        String serviceKey = "&serviceKey=" + apiKey; // 서비스키
 
         try {
             // 지역 기반 관광 정보 조회 api
-            URL localUrl = new URL(defaultURL + "areaBasedList1?" + defaultURL2 + service +
-                    "&contentTypeId=12&arrange=R" + area + pageNum + row);
-            HttpURLConnection localUrlConnection = (HttpURLConnection) localUrl.openConnection();
-            localUrlConnection.setRequestMethod("GET");
-            localUrlConnection.setRequestProperty("Content-type", "application/json");
+            URL localUrl = new URI(baseAPIUrl + serviceKey + contentTypeParam + arrangeParam + areaParam + pageParam + rowParam).toURL();
+            log.info(localUrl.toString());
 
-            // BufferedReader로 응답을 UTF-8로 읽어오기
-            BufferedReader bf = new BufferedReader(new InputStreamReader(localUrlConnection.getInputStream(), StandardCharsets.UTF_8));
+            JSONArray items = JsonParsingUtil.parsingJsonFromUrl(localUrl, result);
 
-            String line;
-            while ((line = bf.readLine()) != null) {
-                result.append(line);
-            }
-
-            // JSON 파싱
-            JSONObject jsonResponse = new JSONObject(result.toString());
-            JSONObject responseBody = jsonResponse.getJSONObject("response").getJSONObject("body");
-            JSONArray items = responseBody.getJSONObject("items").getJSONArray("item");
-
+            if (items == null)
+                return ;
 
             for (int i = 0; i < items.length(); i++) {
                 JSONObject item = items.getJSONObject(i);
@@ -85,9 +76,11 @@ public class SettingLocationService {
 
                 // Location 엔티티 생성
                 location.setArea(areaRepository.findByAreaCode(item.getLong("areacode")));
-
-                // Location 설명 추가
                 setDescription(location);
+
+                // 기존에 존재하는 location인 경우
+                if (locationRepository.existsByContentId(location.getContentId()))
+                    continue;
 
                 // 리스트에 추가
                 locationList.add(location);
@@ -97,94 +90,97 @@ public class SettingLocationService {
             locationRepository.saveAll(locationList);
             log.info("Locations inserted successfully into the database.");
         }
+        catch (URISyntaxException e) {
+            log.error("An error occurred while making url: ", e);
+        }
         catch (IOException e) {
             log.error("An error occurred while parsing and saving location data: ", e);
         }
     }
 
     public void setDescription(Location location) {
+        StringBuilder infoResult = new StringBuilder();
 
-        String service = "&serviceKey=" + serviceKey;
-        Long contentId = location.getContentId();
+        // Base URL
+        String baseAPIUrl = defaultURL + "detailCommon1?" + defaultParam;
+
+        // Query Parameters
+        String descriptionParam = "&defaultYN=Y&overviewYN=Y";
+        String contentIdParam = "&contentId=" + location.getContentId().toString();
+
+        // Service key
+        String serviceKey = "&serviceKey=" + apiKey; // 서비스키
 
         // 공통 정보 조회 api
-        StringBuffer infoResult = new StringBuffer();
-
         try {
-            URL infoUrl = new URL(defaultURL + "detailCommon1?" + defaultURL2 +
-                    service + "&defaultYN=Y&overviewYN=Y&contentId=" + contentId.toString());
+            URL infoUrl = new URI(baseAPIUrl + serviceKey + descriptionParam + contentIdParam).toURL();
 
-            HttpURLConnection infoUrlConnection = (HttpURLConnection) infoUrl.openConnection();
-            infoUrlConnection.setRequestMethod("GET");
-            infoUrlConnection.setRequestProperty("Content-type", "application/json");
+            JSONArray infoArray = JsonParsingUtil.parsingJsonFromUrl(infoUrl, infoResult);
+            if (infoArray == null)
+                return ;
 
-            BufferedReader infoBf = new BufferedReader(new InputStreamReader(infoUrlConnection.getInputStream(), StandardCharsets.UTF_8));
-
-            String infoline;
-            while ((infoline = infoBf.readLine()) != null) {
-                infoResult.append(infoline);
-            }
-
-            // JSON 파싱
-            // JSONObject로 변환
-            JSONObject infoJsonResponse = new JSONObject(infoResult.toString());
-            JSONObject infoResponseBody = infoJsonResponse.getJSONObject("response").getJSONObject("body");
-            JSONObject infoItem = infoResponseBody.getJSONObject("items").getJSONArray("item").getJSONObject(0);
-
-            String description = infoItem.optString("overview", "설명 없음");
+            String description = infoArray.getJSONObject(0).optString("overview", "설명 없음");
             if (description.length() > 255) {
                 description = description.substring(0, 255);
             }
-
             location.setDescription(description);
         }
         catch (IOException e) {
             log.error("An error occurred while parsing and saving Desciption data: ", e);
+        } catch (URISyntaxException e) {
+            log.error("An error occurred while making url: ", e);
         }
     }
 
     public void setDisabled(List<Location> locationList, List<Disabled> disabledList) {
-
-        String service = "&serviceKey=" + serviceKey;
-
         ObjectMapper objectMapper = new ObjectMapper();
 
-        // 무장애 여행 조회 API
+        // Base URL
+        String baseAPIUrl = defaultURL + "detailWithTour1?" + defaultParam;
+
+        // Service key
+        String serviceKey = "&serviceKey=" + apiKey; // 서비스키
+
         try {
-            for (int i = 0; i < locationList.size(); i++) {
-                StringBuffer disabledResult = new StringBuffer();
+            for (Location location : locationList) {
+                StringBuilder disabledResult = new StringBuilder();
 
-                Long contentId = locationList.get(i).getContentId();
-                URL disabledURL = new URL(defaultURL + "detailWithTour1?" + defaultURL2 +
-                        service + "&contentId=" + contentId.toString());
+                // Query Parameters
+                String contentIdParam = "&contentId=" + location.getContentId().toString();
 
-                HttpURLConnection disabledUrlConnection = (HttpURLConnection) disabledURL.openConnection();
-                disabledUrlConnection.setRequestMethod("GET");
-                disabledUrlConnection.setRequestProperty("Content-type", "application/json");
+                URL disabledURL = new URI(baseAPIUrl + serviceKey + contentIdParam).toURL();
 
-                BufferedReader disabledBf = new BufferedReader(new InputStreamReader(disabledUrlConnection.getInputStream(), StandardCharsets.UTF_8));
+                JSONArray detailArray = JsonParsingUtil.parsingJsonFromUrl(disabledURL, disabledResult);
+                if (detailArray == null)
+                    continue;
 
-                String disabledline;
-                while ((disabledline = disabledBf.readLine()) != null) {
-                    disabledResult.append(disabledline);
-                }
-
-                // JSON 파싱
-                JSONObject disabledJsonResponse = new JSONObject(disabledResult.toString());
-                JSONObject disabledResponseBody = disabledJsonResponse.getJSONObject("response").getJSONObject("body");
-                JSONObject disabledItem = disabledResponseBody.getJSONObject("items").getJSONArray("item").getJSONObject(0);
-
-                Disabled disabled = objectMapper.readValue(disabledItem.toString(), Disabled.class);
-                disabledList.add(disabled);
+                Disabled disabled = objectMapper.readValue(detailArray.getJSONObject(0).toString(), Disabled.class);
+                addDisabledToList(disabled, location, disabledList);
             }
 
-            // 장애 정보 리스트 DB에 저장
-            disabledRepository.saveAll(disabledList);
-            log.info("Locations inserted successfully into the database.");
-        }
-        catch (IOException e)
-        {
+            if (!disabledList.isEmpty()) {
+                disabledRepository.saveAll(disabledList);
+                log.info("Locations disabled info inserted successfully into the database.");
+            } else {
+                log.warn("No disabled data to save.");
+            }
+
+        } catch (IOException e) {
             log.error("An error occurred while parsing and saving Disabled data: ", e);
+        } catch (URISyntaxException e) {
+            log.error("An error occurred while making url: ", e);
+        }
+    }
+
+    private void addDisabledToList(Disabled disabled, Location location, List<Disabled> disabledList) {
+        disabled.setLocation(location);
+        log.info("Disabled : " + disabled.getLocation());
+
+        if (!disabledRepository.existsByLocation(disabled.getLocation())) {
+            disabledList.add(disabled);
+            log.info("Disabled added");
+        } else {
+            log.info("Duplicate disabled data found for location: " + location.getContentId());
         }
     }
 }
