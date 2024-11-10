@@ -28,13 +28,18 @@ public class DataController {
     }
 
     @PostMapping("/location/{areaCode}/{page}")
-    public ResponseEntity<String> getLocation(
-            @PathVariable("areaCode") String areaCode,
-            @PathVariable("page") String page) {
-
-            settingLocationService.setLocationAndDisabled(areaCode, page);
-
+    public ResponseEntity<String> getLocation(@PathVariable("areaCode") String areaCode,
+                                              @PathVariable("page") String page) {
+        String CONTENT_ATTRACTION = "12";
+        settingLocationService.setLocationAndDisabled(areaCode, page, CONTENT_ATTRACTION);
         return ResponseEntity.ok("Location data inserted successfully!\n");
     }
 
+    @PostMapping("/restaurant/{areaCode}/{page}")
+    public ResponseEntity<String> getRestaurant(@PathVariable("areaCode") String areaCode,
+                                                @PathVariable("page") String page) {
+        String CONTENT_RESTAURANT = "39";
+        settingLocationService.setLocationAndDisabled(areaCode, page, CONTENT_RESTAURANT);
+        return ResponseEntity.ok("Restaurant data inserted successfully!\n");
+    }
 }
