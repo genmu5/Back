@@ -2,9 +2,7 @@ package com.example.BEF.User.Service;
 
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Repository.CourseRepository;
-import com.example.BEF.Disability.DisabilityRepository;
-import com.example.BEF.Disability.UserDisability;
-import com.example.BEF.Disability.UserDisabilityRepository;
+import com.example.BEF.Disability.*;
 import com.example.BEF.TripType.TripTypeRepository;
 import com.example.BEF.TripType.UserTripType;
 import com.example.BEF.TripType.UserTripTypeRepository;
@@ -58,13 +56,14 @@ public class UserService {
         return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName()));
     }
 
-//    public UserDisabledDTO settingUserDisabled(Long userNumber) {
-    public UserDisabledDTO settingUserDisabled(String uuid) {
-//        User disabledUser = userRepository.findUserByUserNumber(userNumber);
-        User disabledUser = userRepository.findUserByUuid(uuid);
+    public UserDisabledDTO settingUserDisabled(Long userNumber) {
+        User disabledUser = userRepository.findUserByUserNumber(userNumber);
 
-        return (new UserDisabledDTO(disabledUser.getSenior(), disabledUser.getWheelchair(),
-                disabledUser.getBlindHandicap(), disabledUser.getHearingHandicap(), disabledUser.getInfantsFamily()));
+
+        return (UserDisabledDTO.of(userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.MOBILITY.name())),
+                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.BLIND.name())),
+                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.HEAR.name())),
+                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.FAMILY.name()))));
     }
 
     public Boolean existUser(String uuid) {
