@@ -1,15 +1,12 @@
 package com.example.BEF.Disability;
 
-import com.example.BEF.User.Domain.Disability;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class DisabilityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "disability_number")
     private Long disabilityNumber;
 
     private Disability name;
