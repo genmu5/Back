@@ -1,7 +1,8 @@
 package com.example.BEF.User.Service;
 
-import com.example.BEF.Course.Domain.Course;
+import com.example.BEF.Course.DTO.UserCourseRes;
 import com.example.BEF.Course.Repository.CourseRepository;
+import com.example.BEF.Course.Repository.UserCourseRepository;
 import com.example.BEF.Disability.*;
 import com.example.BEF.TripType.TripTypeRepository;
 import com.example.BEF.TripType.UserTripType;
@@ -13,11 +14,15 @@ import com.example.BEF.User.Domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
+    private final UserCourseRepository userCourseRepository;
     private final TripTypeRepository tripTypeRepository;
     private final UserTripTypeRepository userTripTypeRepository;
     private final DisabilityRepository disabilityRepository;
@@ -48,10 +53,6 @@ public class UserService {
                 .map(disabilityEntity -> UserDisability.of(savedUser, disabilityEntity))
                 .toList());
 
-        // 유저 저장한 관광지 리스트
-        Course saveCourse = new Course(savedUser, "저장", "");
-        courseRepository.save(saveCourse);
-
         // 유저 정보 리턴
         return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName()));
     }
@@ -66,7 +67,25 @@ public class UserService {
                 userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.FAMILY.name()))));
     }
 
-    public Boolean existUser(String uuid) {
-        return userRepository.existsByUuid(uuid);
+    public Boolean existUser(Long userNumber) {
+        return userRepository.existsByUserNumber(userNumber);
+    }
+
+    public List<UserCourseRes> getCourseList(Long userNumber) {
+        return courseRepository.findAllByUser(userRepository.findUserByUserNumber(userNumber)).stream()
+                .map(course -> {
+                    var userCourse = userCourseRepository.findFirstByCourseAndDay(course, 1L);
+                    String originalImage = (userCourse != null && userCourse.getLocation() != null)
+                            ? userCourse.getLocation().getOriginalImage()
+                            : null;
+
+                    // originalImage가 null인 경우 건너뛰기
+                    return originalImage != null ? UserCourseRes.builder()
+                            .course(course)
+                            .originalImage(originalImage)
+                            .build() : null;
+                })
+                .filter(Objects::nonNull) // null을 필터링
+                .toList();
     }
 }
