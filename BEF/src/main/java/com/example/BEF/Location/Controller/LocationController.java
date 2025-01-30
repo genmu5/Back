@@ -37,13 +37,10 @@ public class LocationController {
             @ApiResponse(responseCode = "200", description = "필터링된 관광지 리스트입니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-//    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    @Parameter(name = "uuid", description = "uuid", example = "32")
-//    public ResponseEntity<List<LocationInfoRes>> getRecLocations(@RequestParam("userNumber") Long userNumber) {
-    public ResponseEntity<List<LocationInfoRes>> getRecLocations(@RequestParam("uuid") String uuid) {
+    @Parameter(name = "userNumber", description = "유저 번호", example = "32")
+    public ResponseEntity<List<LocationInfoRes>> getRecLocations(@RequestParam("userNumber") Long userNumber) {
         // 존재하지 않는 유저인 경우
-//        User user = userRepository.findUserByUserNumber(userNumber) == null;
-        User user = userRepository.findUserByUuid(uuid);
+        User user = userRepository.findUserByUserNumber(userNumber);
         if (user == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 

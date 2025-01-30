@@ -29,11 +29,10 @@ public class DisabledService {
     public Set<Disabled> filterByUserDisabilityAndTravelType(UserDisabledDTO userDisabledDTO, List<String> travelTypes) {
         // 기본 SQL 쿼리
         StringBuilder queryBuilder = new StringBuilder("SELECT d.* FROM disabled d JOIN location l ON d.content_id = l.content_id " +
-                "WHERE (:senior = false OR (d.elevator IS NOT NULL AND d.elevator <> '' AND d.entrance IS NOT NULL AND d.entrance <> '' AND d.public_transport IS NOT NULL AND d.public_transport <> '')) " +
-                "AND (:wheelchair = false OR (d.elevator IS NOT NULL AND d.elevator <> '' AND d.entrance IS NOT NULL AND d.entrance <> '' AND d.public_transport IS NOT NULL AND d.public_transport <> '')) " +
-                "AND (:blindHandicap = false OR (d.braile_block IS NOT NULL AND d.braile_block <> '' AND d.guide_human IS NOT NULL AND d.guide_human <> '')) " +
-                "AND (:hearingHandicap = false OR (d.sign_guide IS NOT NULL AND d.sign_guide <> '' OR d.video_guide IS NOT NULL AND d.video_guide <> '' OR d.hearing_room IS NOT NULL AND d.hearing_room <> '' OR d.hearing_handicap_etc IS NOT NULL AND d.hearing_handicap_etc <> '')) " +
-                "AND (:infantsFamily = false OR (d.stroller IS NOT NULL AND d.stroller <> '' OR d.lactation_room IS NOT NULL AND d.lactation_room <> '' OR d.baby_spare_chair IS NOT NULL AND d.baby_spare_chair <> '' OR d.infants_family_etc IS NOT NULL AND d.infants_family_etc <> '')) ");
+                "WHERE (:mobility = false OR (d.elevator IS NOT NULL AND d.elevator <> '' AND d.entrance IS NOT NULL AND d.entrance <> '' AND d.public_transport IS NOT NULL AND d.public_transport <> '')) " +
+                "AND (:blind = false OR (d.braile_block IS NOT NULL AND d.braile_block <> '' AND d.guide_human IS NOT NULL AND d.guide_human <> '')) " +
+                "AND (:hear = false OR (d.sign_guide IS NOT NULL AND d.sign_guide <> '' OR d.video_guide IS NOT NULL AND d.video_guide <> '' OR d.hearing_room IS NOT NULL AND d.hearing_room <> '' OR d.hearing_handicap_etc IS NOT NULL AND d.hearing_handicap_etc <> '')) " +
+                "AND (:family = false OR (d.stroller IS NOT NULL AND d.stroller <> '' OR d.lactation_room IS NOT NULL AND d.lactation_room <> '' OR d.baby_spare_chair IS NOT NULL AND d.baby_spare_chair <> '' OR d.infants_family_etc IS NOT NULL AND d.infants_family_etc <> '')) ");
 
         // travelTypes가 존재하면 각 travelType에 대해 LIKE 조건 추가
         if (travelTypes != null && !travelTypes.isEmpty()) {
@@ -54,11 +53,10 @@ public class DisabledService {
         Query query = entityManager.createNativeQuery(queryBuilder.toString(), Disabled.class);
 
         // 파라미터 바인딩
-        query.setParameter("senior", userDisabledDTO.getSenior());
-        query.setParameter("wheelchair", userDisabledDTO.getWheelchair());
-        query.setParameter("blindHandicap", userDisabledDTO.getBlind_handicap());
-        query.setParameter("hearingHandicap", userDisabledDTO.getHearing_handicap());
-        query.setParameter("infantsFamily", userDisabledDTO.getInfants_family());
+        query.setParameter("mobility", userDisabledDTO.getMobility());
+        query.setParameter("blind", userDisabledDTO.getBlind());
+        query.setParameter("hear", userDisabledDTO.getHear());
+        query.setParameter("family", userDisabledDTO.getFamily());
 
         // travelTypes가 존재하면 각 travelType에 대한 파라미터 설정
         if (travelTypes != null && !travelTypes.isEmpty()) {
