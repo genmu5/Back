@@ -4,11 +4,13 @@ import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.User.Domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "saved")
 @NoArgsConstructor
+@Getter
 public class Saved {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

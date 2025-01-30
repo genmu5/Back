@@ -2,8 +2,10 @@ package com.example.BEF.Course.Service;
 
 import com.example.BEF.Course.DTO.*;
 import com.example.BEF.Course.Domain.Course;
+import com.example.BEF.Course.Domain.Saved;
 import com.example.BEF.Course.Domain.UserCourse;
 import com.example.BEF.Course.Repository.CourseRepository;
+import com.example.BEF.Course.Repository.SavedRepository;
 import com.example.BEF.Course.Repository.UserCourseRepository;
 import com.example.BEF.Disabled.Domain.Disabled;
 import com.example.BEF.Disabled.Repository.DisabledRepository;
@@ -14,6 +16,7 @@ import com.example.BEF.Location.Repository.LocationRepository;
 import com.example.BEF.User.Domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +29,26 @@ public class CourseService {
     private final UserCourseRepository userCourseRepository;
     private final LocationRepository locationRepository;
     private final DisabledRepository disabledRepository;
+    private final SavedRepository savedRepository;
+    private final AIRecCourse aiRecCourse;
 
+    @Transactional
     // 코스 생성
-    public CourseInfoRes createUserCourse(User user, CreateCourseReq createCourseReq) {
-        Course course = new Course(user, createCourseReq.getName(), createCourseReq.getDescription());
-        courseRepository.save(course);
+    public CourseInfoRes addCourse(User user, CreateCourseReq createCourseReq) {
+        Course course = addCourseInfo(user, createCourseReq);
 
-        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName(), course.getDescription());
+        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
+    }
+
+    private Course addCourseInfo(User user, CreateCourseReq createCourseReq) {
+        Course course = courseRepository.findCourseByCourseNumber(createCourseReq.getCourseNumber());
+
+        course.setCourseName(createCourseReq.getCourseName());
+        course.setStartDate(createCourseReq.getStartDate());
+        course.setEndDate(createCourseReq.getStartDate().plusDays(course.getPeriod()));
+        course.setUser(user);
+
+        return courseRepository.save(course);
     }
 
     // 코스 삭제
@@ -44,23 +60,23 @@ public class CourseService {
         // 코스 정보 삭제
         courseRepository.delete(course);
 
-        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName(), course.getDescription());
+        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
     }
 
     // 코스 장소 추가
-    public CourseLocRes addLocToCourse(Course course, List<Long> contentIdList) {
-
-        for (Long contentId : contentIdList) {
-            Location location = locationRepository.findLocationByContentId(contentId);
-
-            // 유저 코스 정보 생성
-            UserCourse userCourse = new UserCourse(course, location);
-            userCourseRepository.save(userCourse);
-        }
-
-        // 유저 코스 응답 리턴
-        return (new CourseLocRes(course.getCourseNumber(), course.getCourseName(), contentIdList));
-    }
+//    public CourseLocRes addLocToCourse(Course course, List<Long> contentIdList) {
+//
+//        for (Long contentId : contentIdList) {
+//            Location location = locationRepository.findLocationByContentId(contentId);
+//
+//            // 유저 코스 정보 생성
+//            UserCourse userCourse = new UserCourse(course, location);
+//            userCourseRepository.save(userCourse);
+//        }
+//
+//        // 유저 코스 응답 리턴
+//        return (new CourseLocRes(course.getCourseNumber(), course.getCourseName(), contentIdList));
+//    }
 
     // 코스 장소 삭제
     public void delLocToCourse(Course course, Location location) {
@@ -76,30 +92,25 @@ public class CourseService {
 
     // 관광지 저장
     public CourseSaveRes saveLocation(User user, Location location) {
-        // 유저가 저장한 관광지 코스
-        Course saveLocations = courseRepository.findCourseByUserAndCourseName(user, "저장");
-
         // 유저 코스 정보 생성
-        UserCourse userCourse = new UserCourse(saveLocations, location);
-        userCourseRepository.save(userCourse);
+        Saved saved = Saved.of(user, location);
+        savedRepository.save(saved);
 
         // 유저 코스 응답 리턴
-        return (new CourseSaveRes(saveLocations.getCourseNumber(), saveLocations.getCourseName(), location.getContentId()));
+        return (new CourseSaveRes(location.getContentId()));
     }
 
     // 저장한 관광지 목록 조회
     public List<UserLocationRes> getUserSaveLocations(User user) {
 
-        // 유저가 저장한 관광지 코스
-        Course saveLocations = courseRepository.findCourseByUserAndCourseName(user, "저장");
+        // 유저가 저장한 관광지들
+        List<Saved> savedList = savedRepository.findAllByUser(user);
 
         // 저장한 관광지 정보 리스트
-        List<UserCourse> userCourses = userCourseRepository.findUserCoursesByCourse(saveLocations);
-
         List<UserLocationRes> userLocationResList = new ArrayList<>();
 
-        for (UserCourse userCourse : userCourses) {
-            Location location = userCourse.getLocation();
+        for (Saved saved : savedList) {
+            Location location = saved.getLocation();
             UserLocationRes userLocationRes = new UserLocationRes(location.getContentId(), location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
             userLocationResList.add(userLocationRes);
         }
@@ -123,5 +134,21 @@ public class CourseService {
         }
 
         return (new CourseLocationRes(course, locationInfoResList));
+    }
+
+    public Long createAIRecCourse(Long area, Long period, List<Long> disability, List<Long> tripType) {
+
+        // 필터링 된 관광지
+        List<Location> filteredLocation = locationRepository.filterByAreaAndDisabilityAndTravelType(
+                        area, disability, tripType).stream()
+                .limit(80)
+                .toList();
+
+        // 필터링 된 음식점
+        List<Location> filteredRestaurant = locationRepository.filterByAreaAndContentType(area).stream()
+                .limit(80)
+                .toList();
+
+        return aiRecCourse.generateCourse(filteredLocation, filteredRestaurant, area, period);
     }
 }

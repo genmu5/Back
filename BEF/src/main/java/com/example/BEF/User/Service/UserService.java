@@ -43,13 +43,13 @@ public class UserService {
 
         // 유저 여행 타입 저장
         userTripTypeRepository.saveAll(userJoinReq.getTripType().stream()
-                .map(tripTypeRepository::findByName)
+                .map(tripTypeRepository::findTripTypeEntityByTripTypeNumber)
                 .map(tripTypeEntity -> UserTripType.of(savedUser, tripTypeEntity))
                 .toList());
 
         // 유저 장애 유형 저장
         userDisabilityRepository.saveAll(userJoinReq.getDisability().stream()
-                .map(disabilityRepository::findByName)
+                .map(disabilityRepository::findDisabilityByDisabilityNumber)
                 .map(disabilityEntity -> UserDisability.of(savedUser, disabilityEntity))
                 .toList());
 
@@ -61,10 +61,10 @@ public class UserService {
         User disabledUser = userRepository.findUserByUserNumber(userNumber);
 
 
-        return (UserDisabledDTO.of(userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.MOBILITY.name())),
-                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.BLIND.name())),
-                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.HEAR.name())),
-                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName(Disability.FAMILY.name()))));
+        return (UserDisabledDTO.of(userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName("MOBILITY")),
+                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName("BLIND")),
+                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName("HEAR")),
+                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName("FAMILY"))));
     }
 
     public Boolean existUser(Long userNumber) {

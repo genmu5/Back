@@ -26,10 +26,10 @@ public class UserJoinReq {
     @NotNull
     @Schema(description = "생년월일")
     private LocalDate birth;
-    @Schema(description = "장애 타입, MOBILITY, BLIND, HEAR, FAMILY 중 복수 개를 문자열 리스트 형태로 요청", example = "MOBILITY, BLIND, HEAR, FAMILY")
-    private List<String> disability;
-    @Schema(description = "선호하는 여행 타입, FOREST, OCEAN, HISTORY, OUTSIDE 중 복수 개를 문자열 리스트 형태로 요청", example = "FOREST, OCEAN, HISTORY, OUTSIDE")
-    private List<String> tripType;
+    @Schema(description = "장애 타입, MOBILITY(0), BLIND(1), HEAR(2), FAMILY(3) 중 복수 개를 문자열 리스트 형태로 요청", example = "1, 2, 3")
+    private List<Long> disability;
+    @Schema(description = "선호하는 여행 타입, FOREST(0), OCEAN(1), HISTORY(2), OUTSIDE(3) 중 복수 개를 문자열 리스트 형태로 요청", example = "1, 2")
+    private List<Long> tripType;
 
     public boolean validJoin() {
         if (userName == null || userName.isBlank())
@@ -42,7 +42,7 @@ public class UserJoinReq {
         // 장애 유형 검증
         if (disability != null && !disability.isEmpty()) {
             boolean invalidDisability = disability.stream()
-                    .anyMatch(disabilityName -> !disabilityRepository.existsByName(disabilityName));
+                    .anyMatch(disability -> !disabilityRepository.existsByDisabilityNumber(disability));
             if (invalidDisability) {
                 return false;
             }
@@ -51,7 +51,7 @@ public class UserJoinReq {
         // 선호 여행 타입 검증
         if (tripType != null && !tripType.isEmpty()) {
             boolean invalidTripType = tripType.stream()
-                    .anyMatch(tripTypeName -> !tripTypeRepository.existsByName(tripTypeName));
+                    .anyMatch(tripType -> !tripTypeRepository.existsByTripTypeNumber(tripType));
             if (invalidTripType) {
                 return false;
             }

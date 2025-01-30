@@ -7,7 +7,6 @@ import com.example.BEF.Location.DTO.DetailedInformationResponse;
 import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
-import com.example.BEF.TripType.TripType;
 import com.example.BEF.TripType.TripTypeRepository;
 import com.example.BEF.TripType.UserTripTypeRepository;
 import com.example.BEF.User.DTO.UserDisabledDTO;
@@ -42,13 +41,13 @@ public class LocationService {
         // 여행 타입별 단어 리스트
         List<String> userType = new ArrayList<>();
 
-        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName(TripType.FOREST.name())))
+        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("FOREST")))
             userType.addAll(Arrays.asList("숲", "휴양림", "산림욕장", "치유"));
-        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName(TripType.OCEAN.name())))
+        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("OCEAN")))
             userType.addAll(Arrays.asList("해수욕장", "바다", "물놀이", "호수"));
-        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName(TripType.HISTORY.name())))
+        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("HISTORY")))
             userType.addAll(Arrays.asList("박물관", "미술관", "역사", "문화", "사찰"));
-        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName(TripType.OUTSIDE.name())))
+        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("OUTSIDE")))
             userType.addAll(Arrays.asList("가족", "어린이", "공원", "파크", "레저"));
 
         // 유저 장애 정보

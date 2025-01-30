@@ -18,7 +18,6 @@ public class CourseLocationRes {
     public CourseLocationRes(Course course, List<LocationInfoRes> locationInfoResList) {
         this.courseNumber = course.getCourseNumber();
         this.courseName = course.getCourseName();
-        this.description = course.getDescription();
         this. locationInfoResList = locationInfoResList;
     }
 }
