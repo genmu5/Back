@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TripTypeRepository extends JpaRepository<TripTypeEntity, Long> {
-    boolean existsByName(String name);
+    boolean existsByTripTypeNumber(Long number);
     TripTypeEntity findByName(String name);
+    TripTypeEntity findTripTypeEntityByTripTypeNumber(Long number);
+
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DisabilityRepository extends JpaRepository<DisabilityEntity, Long> {
-    boolean existsByName(String name);
+    boolean existsByDisabilityNumber(Long number);
     DisabilityEntity findByName(String name);
+    DisabilityEntity findDisabilityByDisabilityNumber(Long number);
 }
