@@ -34,10 +34,10 @@ public class User {
     List<Course> courseList;
 
     @OneToMany(mappedBy = "user")
-    List<DisabilityEntity> disabilities;
+    List<UserDisability> disabilities;
 
     @OneToMany(mappedBy = "user")
-    List<TripTypeEntity> tripTypes;
+    List<UserTripType> tripTypes;
 
     public User(String userName, String gender, LocalDate birth) {
         this.userName = userName;
