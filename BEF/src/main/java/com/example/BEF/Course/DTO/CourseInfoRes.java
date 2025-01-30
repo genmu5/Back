@@ -1,16 +1,11 @@
 package com.example.BEF.Course.DTO;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@Data
+@AllArgsConstructor
+@Getter
 public class CourseInfoRes {
     private Long courseNumber;
     private String courseName;
-    private String description;
-
-    public CourseInfoRes(Long courseNumber, String courseName, String description) {
-        this.courseNumber = courseNumber;
-        this.courseName = courseName;
-        this.description = description;
-    }
 }
