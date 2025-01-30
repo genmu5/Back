@@ -57,14 +57,10 @@ public class Course {
     private List<UserTripType> tripTypes;
 
     @Builder
-    public Course(String name, Long period, LocalDate startDate, LocalDate endDate, Double gpsX, Double gpsY, User user, Area area) {
-        this.courseName = name;
+    public Course(Long period, Double gpsX, Double gpsY, Area area) {
         this.period = period;
-        this.startDate = startDate;
-        this.endDate = endDate;
         this.gpsX = gpsX;
         this.gpsY = gpsY;
-        this.user = user;
         this.area = area;
     }
 }
