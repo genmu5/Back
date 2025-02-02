@@ -34,8 +34,7 @@ public class SearchController {
     @ApiResponse(responseCode = "200", description = "키워드 기반으로 관광지 검색에 성공했습니다.", content = @Content(mediaType = "application/json"))
     @Parameter(name = "keyword", description = "검색 키워드", example = "우주")
     public List<MapLocationResponse> searchLocations(@RequestParam("keyword") String keyword) {
-        // 키워드를 기반으로 Location과 Disabled 정보를 조합한 응답 리스트를 반환
-        return searchService.findByKeyword(keyword);
+        return searchService.searchLocationsByKeyword(keyword);
     }
 
     @GetMapping("/map")
@@ -62,7 +61,6 @@ public class SearchController {
     public List<MapLocationResponse> createTranscription(@ModelAttribute TranscriptionRequest transcriptionRequest) {
         WhisperTranscriptionResponse transcriptionResponse = searchService.createTranscription(transcriptionRequest);
 
-        // 변환된 텍스트로 Location 엔티티에서 description 검색 및 MapLocationResponse 리스트로 반환
         return searchService.searchLocationsByKeyword(transcriptionResponse.getText());
     }
 }
