@@ -58,6 +58,13 @@ dependencies {
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+
+	// open-korean-text
+	implementation 'com.twitter.penguin:korean-text:4.4.4'
+
+	// Scala 표준 라이브러리
+	implementation 'org.scala-lang:scala-library:2.11.12'
 }
 
 dependencyManagement {
