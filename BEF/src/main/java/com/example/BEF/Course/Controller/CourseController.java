@@ -4,12 +4,12 @@ import com.example.BEF.Course.Service.CourseService;
 import com.example.BEF.Course.DTO.*;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Repository.CourseRepository;
-import com.example.BEF.Disability.DisabilityEntity;
+import com.example.BEF.Disability.Disability;
 import com.example.BEF.Disability.UserDisability;
 import com.example.BEF.Location.DTO.UserLocationRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
-import com.example.BEF.TripType.TripTypeEntity;
+import com.example.BEF.TripType.TripType;
 import com.example.BEF.TripType.UserTripType;
 import com.example.BEF.User.Domain.User;
 import com.example.BEF.User.Service.UserRepository;
@@ -47,8 +47,8 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         Long courseNumber = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(),
-                user.getDisabilities().stream().map(UserDisability::getDisability).map(DisabilityEntity::getDisabilityNumber).toList(),
-                user.getTripTypes().stream().map(UserTripType::getTripType).map(TripTypeEntity::getTripTypeNumber).toList());
+                user.getDisabilities().stream().map(UserDisability::getDisability).map(Disability::getDisabilityNumber).toList(),
+                user.getTripTypes().stream().map(UserTripType::getTripType).map(TripType::getTripTypeNumber).toList());
 
         if (courseNumber == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
