@@ -1,6 +1,5 @@
 package com.example.BEF.Disability;
 
-import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.User.Domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -23,19 +22,15 @@ public class UserDisability {
 
     @ManyToOne
     @JoinColumn(name = "disability_number")
-    private DisabilityEntity disability;
-
-    @ManyToOne
-    @JoinColumn(name = "course_number")
-    private Course course;
+    private Disability disability;
 
     @Builder
-    private UserDisability(User user, DisabilityEntity disability) {
+    private UserDisability(User user, Disability disability) {
         this.user = user;
         this.disability = disability;
     }
 
-    public static UserDisability of(User user, DisabilityEntity disability) {
+    public static UserDisability of(User user, Disability disability) {
         return UserDisability.builder()
                 .user(user)
                 .disability(disability)

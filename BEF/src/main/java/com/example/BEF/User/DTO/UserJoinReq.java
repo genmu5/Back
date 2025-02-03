@@ -39,23 +39,23 @@ public class UserJoinReq {
         else if (birth == null)
             return false;
 
-        // 장애 유형 검증
-        if (disability != null && !disability.isEmpty()) {
-            boolean invalidDisability = disability.stream()
-                    .anyMatch(disability -> !disabilityRepository.existsByDisabilityNumber(disability));
-            if (invalidDisability) {
-                return false;
-            }
-        }
-
-        // 선호 여행 타입 검증
-        if (tripType != null && !tripType.isEmpty()) {
-            boolean invalidTripType = tripType.stream()
-                    .anyMatch(tripType -> !tripTypeRepository.existsByTripTypeNumber(tripType));
-            if (invalidTripType) {
-                return false;
-            }
-        }
+//        // 장애 유형 검증
+//        if (disability != null && !disability.isEmpty()) {
+//            boolean invalidDisability = disability.stream()
+//                    .anyMatch(disability -> !disabilityRepository.existsByDisabilityNumber(disability));
+//            if (invalidDisability) {
+//                return false;
+//            }
+//        }
+//
+//        // 선호 여행 타입 검증
+//        if (tripType != null && !tripType.isEmpty()) {
+//            boolean invalidTripType = tripType.stream()
+//                    .anyMatch(tripType -> !tripTypeRepository.existsByTripTypeNumber(tripType));
+//            if (invalidTripType) {
+//                return false;
+//            }
+//        }
 
         // 모든 검증을 통과하면 true 반환
         return true;

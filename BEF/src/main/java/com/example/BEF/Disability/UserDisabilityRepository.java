@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserDisabilityRepository extends JpaRepository<UserDisability, Long> {
-    boolean findByUserAndDisability(User user, DisabilityEntity disability);
+    boolean findByUserAndDisability(User user, Disability disability);
 }

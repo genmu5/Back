@@ -1,6 +1,5 @@
 package com.example.BEF.TripType;
 
-import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.User.Domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -24,19 +23,15 @@ public class UserTripType {
     @ManyToOne
     @JoinColumn(name = "trip_type_number")
 
-    private TripTypeEntity tripType;
-
-    @ManyToOne
-    @JoinColumn(name = "course_number")
-    private Course course;
+    private TripType tripType;
 
     @Builder
-    private UserTripType(User user, TripTypeEntity tripType) {
+    private UserTripType(User user, TripType tripType) {
         this.user = user;
         this.tripType = tripType;
     }
 
-    public static UserTripType of(User user, TripTypeEntity tripType) {
+    public static UserTripType of(User user, TripType tripType) {
         return UserTripType.builder()
                 .user(user)
                 .tripType(tripType)
