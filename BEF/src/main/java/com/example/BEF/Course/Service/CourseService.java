@@ -136,6 +136,7 @@ public class CourseService {
         return (new CourseLocationRes(course, locationInfoResList));
     }
 
+    @Transactional
     public Long createAIRecCourse(Long area, Long period, List<Long> disability, List<Long> tripType) {
 
         // 필터링 된 관광지
@@ -144,11 +145,11 @@ public class CourseService {
                 .limit(80)
                 .toList();
 
-        // 필터링 된 음식점
-        List<Location> filteredRestaurant = locationRepository.filterByAreaAndContentType(area).stream()
-                .limit(80)
-                .toList();
+//        // 필터링 된 음식점
+//        List<Location> filteredRestaurant = locationRepository.filterByAreaAndContentType(area).stream()
+//                .limit(80)
+//                .toList();
 
-        return aiRecCourse.generateCourse(filteredLocation, filteredRestaurant, area, period);
+        return aiRecCourse.generateCourse(filteredLocation, disability, area, period);
     }
 }

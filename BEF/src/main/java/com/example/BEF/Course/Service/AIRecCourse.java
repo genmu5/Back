@@ -3,9 +3,12 @@ package com.example.BEF.Course.Service;
 import com.example.BEF.Area.Repository.AreaRepository;
 import com.example.BEF.Course.DTO.ChatGPTRes;
 import com.example.BEF.Course.Domain.Course;
+import com.example.BEF.Course.Domain.CourseDisability;
 import com.example.BEF.Course.Domain.UserCourse;
+import com.example.BEF.Course.Repository.CourseDisabilityRepository;
 import com.example.BEF.Course.Repository.CourseRepository;
 import com.example.BEF.Course.Repository.UserCourseRepository;
+import com.example.BEF.Disability.DisabilityRepository;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,37 +41,70 @@ public class AIRecCourse {
     private final RestTemplate restTemplate;
     private final AreaRepository areaRepository;
     private final CourseRepository courseRepository;
+    private final DisabilityRepository disabilityRepository;
     private final LocationRepository locationRepository;
     private final UserCourseRepository userCourseRepository;
+    private final CourseDisabilityRepository courseDisabilityRepository;
 
-    public Long generateCourse(List<Location> locations, List<Location> restaurants, Long area, Long period) {
-        Map<String, Object> body = new HashMap<>();
-
-        body.put("model", finetuningModel);
-        body.put("messages", List.of(Map.of(
-                "role", "user",
-                "temperature", 0,
-                "content", generatePrompt(locations, restaurants, areaRepository.findByAreaCode(area).getAreaName(), period)
-        )));
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        headers.set("Authorization", "Bearer " + openAiApiKey);
+    public Long generateCourse(List<Location> locations, List<Long> disability, Long area, Long period) {
+        Map<String, Object> body = createOpenAIRequestBody(locations, area, period);
+        HttpHeaders headers = createOpenAIRequestHeader();
 
         // OpenAI API 호출
         ResponseEntity<ChatGPTRes> response = restTemplate.postForEntity(
                 openAiApiUrl, new HttpEntity<>(body, headers), ChatGPTRes.class);
 
         // 응답 처리
-        String aiResponse = response.getBody().getChoice().getFirst().getMessage().getContent();
-        log.info("AI Response Content: {}", aiResponse);
+        try {
+            String aiResponse = response.getBody().getChoice().getFirst().getMessage().getContent();
+            log.info("AI Response Content: {}", aiResponse);
 
-        Map<String, List<Long>> dayWiseContentIds = parseDayWiseContentIds(aiResponse);
+            Map<String, List<Long>> dayWiseContentIds = parseDayWiseContentIds(aiResponse);
 
-        return saveAICourse(period, area, dayWiseContentIds);
+            return saveAICourse(disability, period, area, dayWiseContentIds);
+        }
+        catch (NullPointerException e) {
+            log.info("Null Pointer Exception 발생");
+            return null;
+        }
     }
 
-    private Long saveAICourse(Long period, Long area, Map<String, List<Long>> dayWiseContentIds) {
+    private void saveCourseDisabilities(List<Long> disabilities, Course course) {
+        List<CourseDisability> courseDisabilities = new ArrayList<>();
+
+        for (Long disability : disabilities) {
+            courseDisabilities.add(CourseDisability.builder()
+                    .course(course)
+                    .disability(disabilityRepository.findDisabilityByDisabilityNumber(disability))
+                    .build());
+        }
+
+        courseDisabilityRepository.saveAll(courseDisabilities);
+    }
+
+    private HttpHeaders createOpenAIRequestHeader() {
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", "Bearer " + openAiApiKey);
+
+        return headers;
+    }
+
+    private Map<String, Object> createOpenAIRequestBody(List<Location> locations, Long area, Long period) {
+        Map<String, Object> body = new HashMap<>();
+
+        body.put("model", finetuningModel);
+        body.put("messages", List.of(Map.of(
+                "role", "user",
+                "temperature", 0,
+                "content", generatePrompt(locations, areaRepository.findByAreaCode(area).getAreaName(), period)
+        )));
+
+        return body;
+    }
+
+    private Long saveAICourse(List<Long> disability, Long period, Long area, Map<String, List<Long>> dayWiseContentIds) {
 
         Course course = Course.builder()
                 .period(period)
@@ -88,14 +124,22 @@ public class AIRecCourse {
             }
         }
 
-        List<UserCourse> userCourseList = userCourseRepository.findUserCoursesByCourse(course);
-        course.setGpsX(userCourseList.getFirst().getLocation().getGpsX());
-        course.setGpsY(userCourseList.getFirst().getLocation().getGpsY());
+        try {
+            List<UserCourse> userCourseList = userCourseRepository.findUserCoursesByCourse(course);
+            course.setGpsX(userCourseList.getFirst().getLocation().getGpsX());
+            course.setGpsY(userCourseList.getFirst().getLocation().getGpsY());
+        }
+        catch (NullPointerException e) {
+            log.info("Null Pointer Exception 발생");
+            return null;
+        }
+
+        saveCourseDisabilities(disability, course);
 
         return course.getCourseNumber();
     }
 
-    private String generatePrompt(List<Location> locations, List<Location> restaurants, String area, Long period) {
+    private String generatePrompt(List<Location> locations, String area, Long period) {
 
         StringBuilder prompt = new StringBuilder();
         Long tripPeriod = period + 1L;
@@ -103,14 +147,13 @@ public class AIRecCourse {
 
         prompt.append(defaultPrompt);
         prompt.append("Use the Tourist and Restaurant lists I provide, which include gpsX and gpsY coordinates, to calculate travel distances and estimated travel times." +
-                " For each day, include exactly 3 places with contentTypeId 12 (tourist attractions) and 1 place with contentTypeId 39 (restaurants)." +
+                " For each day, include exactly 3 places with contentTypeId 12 (tourist attractions)." + //and 1 place with contentTypeId 39 (restaurants)." +
                 " Ensure that the travel sequence minimizes travel time (preferably within 15–30 km between places) and provides a logical flow." +
-                " Return the course in the following structure: 'Day 1: [contentId1, contentId2, contentId3, contentId4]', where the content IDs represent the recommended places in order." +
+                " Return the course in the following structure: 'Day 1: [contentId1, contentId2, contentId3]', where the content IDs represent the recommended places in order." +
                 " Ensure the courses are evenly distributed across the days and maintain balance and variety in location selection." +
                 " Provide an estimated travel time between each location in parentheses, using gpsX and gpsY coordinates.");
 
-        // 프롬프트 캐싱
-        // ptu 서비스 - 개인 단계에서 조금 어려움
+        // 개선 방안 : 프롬프트 캐싱, ptu 서비스 - 개인 단계에서 조금 어려움
 
         // Tourist 리스트 추가
         prompt.append("Tourist : [");
@@ -120,11 +163,11 @@ public class AIRecCourse {
         prompt.append("]\n");
 
         // Restaurant 리스트 추가
-        prompt.append("Restaurants: [");
-        prompt.append(restaurants.stream()
-                .map(Location::toPrompt)
-                .collect(Collectors.joining(", ")));
-        prompt.append("]");
+//        prompt.append("Restaurants: [");
+//        prompt.append(restaurants.stream()
+//                .map(Location::toPrompt)
+//                .collect(Collectors.joining(", ")));
+//        prompt.append("]");
 
         log.info("Generated Prompt: {}", prompt);
         return prompt.toString();

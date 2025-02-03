@@ -1,6 +1,6 @@
 package com.example.BEF.Course.DTO;
 
-import com.example.BEF.TTS.dto.response.Choice;
+import com.example.BEF.tts.dto.response.Choice;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;

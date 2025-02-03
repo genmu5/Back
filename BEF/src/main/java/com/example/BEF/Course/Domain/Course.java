@@ -1,8 +1,6 @@
 package com.example.BEF.Course.Domain;
 
 import com.example.BEF.Area.Domain.Area;
-import com.example.BEF.Disability.UserDisability;
-import com.example.BEF.TripType.UserTripType;
 import com.example.BEF.User.Domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -50,11 +48,11 @@ public class Course {
     @JoinColumn(name = "area_number")
     private Area area;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserDisability> disabilities;
+    @OneToMany(mappedBy = "course")
+    private List<CourseDisability> courseDisabilities;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserTripType> tripTypes;
+    @OneToMany(mappedBy = "course")
+    private List<UserCourse> userCourses;
 
     @Builder
     public Course(Long period, Double gpsX, Double gpsY, Area area) {
