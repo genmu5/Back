@@ -19,6 +19,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_number")
     private Long userNumber;      // 유저 번호
 
     @Column(name = "user_name")

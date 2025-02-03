@@ -46,7 +46,7 @@ public class UserController {
 
     @GetMapping("/exist")
     @Operation(summary = "유저 존재 여부 확인", description = "해당 유저 존재 여부 확인 API")
-    @Parameter(name = "uuid", description = "uuid", example = "finetuning0")
+    @Parameter(name = "userNumber", description = "userNumber", example = "1")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "true : 유저가 존재합니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "false : 유저가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
