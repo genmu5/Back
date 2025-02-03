@@ -7,9 +7,10 @@ import com.example.BEF.Location.DTO.DetailedInformationResponse;
 import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
+import com.example.BEF.TripType.TripTypeRepository;
+import com.example.BEF.TripType.UserTripTypeRepository;
 import com.example.BEF.User.DTO.UserDisabledDTO;
 import com.example.BEF.User.Domain.User;
-import com.example.BEF.User.Service.UserRepository;
 import com.example.BEF.User.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +28,10 @@ public class LocationService {
 
     private final UserService userService;
     private final  DisabledService disabledService;
-    private final UserRepository userRepository;
     private final LocationRepository locationRepository;
     private final DisabledRepository disabledRepository;
+    private final UserTripTypeRepository userTripTypeRepository;
+    private final TripTypeRepository tripTypeRepository;
 
     // 관광지 필터링 - 유저 장애 정보 관련
     public List<LocationInfoRes> filteringLocations(User user) {
@@ -39,18 +41,17 @@ public class LocationService {
         // 여행 타입별 단어 리스트
         List<String> userType = new ArrayList<>();
 
-        if (user.getForest())
+        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("FOREST")))
             userType.addAll(Arrays.asList("숲", "휴양림", "산림욕장", "치유"));
-        if (user.getOcean())
+        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("OCEAN")))
             userType.addAll(Arrays.asList("해수욕장", "바다", "물놀이", "호수"));
-        if (user.getCulture())
+        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("HISTORY")))
             userType.addAll(Arrays.asList("박물관", "미술관", "역사", "문화", "사찰"));
-        if (user.getOutside())
+        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("OUTSIDE")))
             userType.addAll(Arrays.asList("가족", "어린이", "공원", "파크", "레저"));
 
         // 유저 장애 정보
-//        UserDisabledDTO userDisabledDTO = userService.settingUserDisabled(userNumber);
-        UserDisabledDTO userDisabledDTO = userService.settingUserDisabled(user.getUuid());
+        UserDisabledDTO userDisabledDTO = userService.settingUserDisabled(user.getUserNumber());
 
         // 필터링 된 관광지 장애 정보 리스트
         Set<Disabled> filteredDisabledList = disabledService.filterByUserDisabilityAndTravelType(userDisabledDTO, userType);

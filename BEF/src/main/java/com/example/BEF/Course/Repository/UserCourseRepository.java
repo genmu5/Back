@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
     UserCourse findUserCourseByCourseAndLocation(Course course, Location location);
-
     List<UserCourse> findUserCoursesByCourse(Course course);
+    UserCourse findFirstByCourseAndDay(Course course, Long day);
 }
