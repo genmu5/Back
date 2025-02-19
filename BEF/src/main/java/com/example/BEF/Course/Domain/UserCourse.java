@@ -20,6 +20,9 @@ public class UserCourse {
     @Column(name = "day")
     private Long day;
 
+    @Column(name = "order")
+    private Long order;
+
     @ManyToOne
     @JoinColumn(name = "course_number")
     private Course course;
