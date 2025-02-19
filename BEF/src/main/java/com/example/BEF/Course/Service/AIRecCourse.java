@@ -115,12 +115,14 @@ public class AIRecCourse {
 
         for (Long day = 1L; day <= 3; day++) {
             List<Long> locaionList = dayWiseContentIds.getOrDefault("Day " + day, List.of());
+            Long courseOrder = 1L;
 
             for (Long content : locaionList) {
-                UserCourse userCourse = new UserCourse(day, course, locationRepository.findLocationByContentId(content));
+                UserCourse userCourse = new UserCourse(day, courseOrder, course, locationRepository.findLocationByContentId(content));
                 if (userCourse.getLocation() == null)
                     continue;
                 userCourseRepository.save(userCourse);
+                courseOrder++;
             }
         }
 

@@ -32,8 +32,9 @@ public class UserCourse {
     private Location location;
 
     @Builder
-    public UserCourse(Long day, Course course, Location location) {
+    public UserCourse(Long day,  Long order, Course course, Location location) {
         this.day = day;
+        this.order = order;
         this.course = course;
         this.location = location;
     }
