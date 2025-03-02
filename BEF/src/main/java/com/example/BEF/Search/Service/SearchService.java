@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,31 +116,38 @@ public class SearchService {
 
 
     private List<Location> searchLocationsDynamically(List<String> keywords) {
+        if (keywords.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Location> query = cb.createQuery(Location.class);
         Root<Location> root = query.from(Location.class);
 
         List<Predicate> predicates = new ArrayList<>();
+
         for (String keyword : keywords) {
-            predicates.add(cb.like(root.get("description"), "%" + keyword + "%"));
+            Predicate addrMatch = cb.like(cb.lower(root.get("addr")), "%" + keyword.toLowerCase() + "%");
+            Predicate descriptionMatch = cb.like(cb.lower(root.get("description")), "%" + keyword.toLowerCase() + "%");
+
+            predicates.add(cb.or(addrMatch, descriptionMatch));
         }
 
-        query.select(root).where(cb.or(predicates.toArray(new Predicate[0])));
+        query.select(root)
+                .where(cb.or(predicates.toArray(new Predicate[0])))
+                .groupBy(root.get("id"))
+                .having(cb.ge(cb.count(root.get("id")), 1));
 
-        List<Location> results = entityManager.createQuery(query).getResultList();
+        List<Location> results = entityManager.createQuery(query)
+                .setMaxResults(100)
+                .getResultList();
 
-        List<Location> filteredResults = results.stream()
-                .filter(location -> {
-                    int matchCount = (int) keywords.stream()
-                            .filter(keyword -> location.getDescription().contains(keyword))
-                            .count();
-                    return matchCount >= 2;
-                })
-                .collect(Collectors.toList());
+        results.sort(Comparator.comparing((Location loc) -> keywords.stream().filter(kw -> loc.getAddr().toLowerCase().contains(kw)).count()).reversed());
 
-
-        return filteredResults;
+        return results;
     }
+
+
 
     public List<Location> findLocationWithRadius(double lat, double lng){
         return searchRepository.findLocationsWithinRadius(lat, lng);
