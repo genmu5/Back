@@ -41,14 +41,22 @@ public class CourseController {
 
     // AI 코스 빠른 생성 API
     @PostMapping("/ai-rec-quick")
+    @Operation(summary = "AI 코스 리스트 생성", description = "AI 코스 리스트 생성 API")
+    @Parameter(name = "userNumber", description = "유저 번호", example = "116")
+    @Parameter(name = "area", description = "지역 번호", example = "1")
+    @Parameter(name = "period", description = "여행기간", example = "3")
     public ResponseEntity<Long> createAIRecQuick(@RequestBody AIQuickCourseReq aiCourseReq) {
         User user = userRepository.findUserByUserNumber(aiCourseReq.getUserNumber());
         if (user == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
-        Long courseNumber = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(),
+        Long courseNumber = courseService.createAIRecCourse(
+                aiCourseReq.getArea(),
+                aiCourseReq.getPeriod(),
                 user.getDisabilities().stream().map(UserDisability::getDisability).map(Disability::getDisabilityNumber).toList(),
-                user.getTripTypes().stream().map(UserTripType::getTripType).map(TripType::getTripTypeNumber).toList());
+                user.getTripTypes().stream().map(UserTripType::getTripType).map(TripType::getTripTypeNumber).toList(),
+                user.getUserNumber()
+        );
 
         if (courseNumber == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -58,9 +66,20 @@ public class CourseController {
 
     // AI 코스 세부 생성 API
     @PostMapping("/ai-rec")
+    @Operation(summary = "AI 코스 세부 생성", description = "AI 코스 세부 생성 API")
+    @Parameter(name = "userNumber", description = "유저 번호", example = "116")
+    @Parameter(name = "area", description = "지역 번호", example = "1")
+    @Parameter(name = "period", description = "여행기간", example = "3")
+    @Parameter(name = "TripType", description = "여행 유형", example = "[1, 2]")
+    @Parameter(name = "Disability", description = "장애 지원", example = "[3, 4]")
     public ResponseEntity<Long> createAIRec(@RequestBody AICourseReq aiCourseReq) {
-        Long courseNumber = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(), aiCourseReq.getDisability(), aiCourseReq.getTripType());
-
+        Long courseNumber = courseService.createAIRecCourse(
+                aiCourseReq.getArea(),
+                aiCourseReq.getPeriod(),
+                aiCourseReq.getDisability(),
+                aiCourseReq.getTripType(),
+                aiCourseReq.getUserNumber()
+        );
         if (courseNumber == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 

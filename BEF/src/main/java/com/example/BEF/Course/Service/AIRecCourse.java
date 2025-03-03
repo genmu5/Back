@@ -11,6 +11,8 @@ import com.example.BEF.Course.Repository.UserCourseRepository;
 import com.example.BEF.Disability.DisabilityRepository;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
+import com.example.BEF.User.Domain.User;
+import com.example.BEF.User.Service.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,8 +47,9 @@ public class AIRecCourse {
     private final LocationRepository locationRepository;
     private final UserCourseRepository userCourseRepository;
     private final CourseDisabilityRepository courseDisabilityRepository;
+    private final UserRepository userRepository;
 
-    public Long generateCourse(List<Location> locations, List<Long> disability, Long area, Long period) {
+    public Long generateCourse(List<Location> locations, List<Long> disability, Long area, Long period , String courseName, Long userNumber) {
         Map<String, Object> body = createOpenAIRequestBody(locations, area, period);
         HttpHeaders headers = createOpenAIRequestHeader();
 
@@ -61,7 +64,7 @@ public class AIRecCourse {
 
             Map<String, List<Long>> dayWiseContentIds = parseDayWiseContentIds(aiResponse);
 
-            return saveAICourse(disability, period, area, dayWiseContentIds);
+            return saveAICourse(disability, period, area, dayWiseContentIds,courseName, userNumber);
         }
         catch (NullPointerException e) {
             log.info("Null Pointer Exception 발생");
@@ -104,9 +107,19 @@ public class AIRecCourse {
         return body;
     }
 
-    private Long saveAICourse(List<Long> disability, Long period, Long area, Map<String, List<Long>> dayWiseContentIds) {
+    private Long saveAICourse(List<Long> disability, Long period, Long area, Map<String, List<Long>> dayWiseContentIds, String courseName , long userNumber) {
+
+        if (courseName == null || courseName.trim().isEmpty()) {
+            courseName = "AI 추천 여행 코스";
+        }
+
+        User user = userRepository.findById(userNumber)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userNumber));
+
 
         Course course = Course.builder()
+                .courseName(courseName)
+                .user(user)
                 .period(period)
                 .area(areaRepository.findByAreaCode(area))
                 .build();

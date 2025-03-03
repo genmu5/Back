@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.BEF.User.Domain.QUser.user;
+
 @Service
 @RequiredArgsConstructor
 public class CourseService {
@@ -137,7 +139,9 @@ public class CourseService {
     }
 
     @Transactional
-    public Long createAIRecCourse(Long area, Long period, List<Long> disability, List<Long> tripType) {
+    public Long createAIRecCourse(Long area, Long period, List<Long> disability, List<Long> tripType, Long userNumber) {
+
+        String courseName = "AI 추천 여행 코스";
 
         // 필터링 된 관광지
         List<Location> filteredLocation = locationRepository.filterByAreaAndDisabilityAndTravelType(
@@ -150,6 +154,6 @@ public class CourseService {
 //                .limit(80)
 //                .toList();
 
-        return aiRecCourse.generateCourse(filteredLocation, disability, area, period);
+        return aiRecCourse.generateCourse(filteredLocation, disability, area, period, courseName, userNumber);
     }
 }
