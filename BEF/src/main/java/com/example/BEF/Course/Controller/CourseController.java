@@ -41,30 +41,30 @@ public class CourseController {
 
     // AI 코스 빠른 생성 API
     @PostMapping("/ai-rec-quick")
-    public ResponseEntity<Long> createAIRecQuick(@RequestBody AIQuickCourseReq aiCourseReq) {
+    public ResponseEntity<CourseLocRes> createAIRecQuick(@RequestBody AIQuickCourseReq aiCourseReq) {
         User user = userRepository.findUserByUserNumber(aiCourseReq.getUserNumber());
         if (user == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
-        Long courseNumber = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(),
+        CourseLocRes courseLocRes = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(),
                 user.getDisabilities().stream().map(UserDisability::getDisability).map(Disability::getDisabilityNumber).toList(),
                 user.getTripTypes().stream().map(UserTripType::getTripType).map(TripType::getTripTypeNumber).toList());
 
-        if (courseNumber == null)
+        if (courseLocRes == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(courseNumber);
+        return ResponseEntity.status(HttpStatus.CREATED).body(courseLocRes);
     }
 
     // AI 코스 세부 생성 API
     @PostMapping("/ai-rec")
-    public ResponseEntity<Long> createAIRec(@RequestBody AICourseReq aiCourseReq) {
-        Long courseNumber = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(), aiCourseReq.getDisability(), aiCourseReq.getTripType());
+    public ResponseEntity<CourseLocRes> createAIRec(@RequestBody AICourseReq aiCourseReq) {
+        CourseLocRes courseLocRes = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(), aiCourseReq.getDisability(), aiCourseReq.getTripType());
 
-        if (courseNumber == null)
+        if (courseLocRes == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(courseNumber);
+        return ResponseEntity.status(HttpStatus.CREATED).body(courseLocRes);
     }
 
     // 코스 추가 API
@@ -107,25 +107,6 @@ public class CourseController {
         // 코스 생성
         return ResponseEntity.status(HttpStatus.OK).body(courseService.deleteUserCourse(course));
     }
-
-    // 코스 장소 추가 API - 연동x
-//    @PostMapping("/{courseNumber}/add")
-//    @Operation(summary = "코스에 장소 추가", description = "코스 장소 추가 API")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "코스에 장소를 추가했습니다.", content = @Content(mediaType = "application/json")),
-//            @ApiResponse(responseCode = "400", description = "존재하지 않는 코스 또는 관광지입니다.", content = @Content(mediaType = "application/json")),
-//    })
-//    @Parameter(name = "courseNumber", description = "코스 번호", example = "25")
-//    public ResponseEntity<CourseLocRes> addLocation(@PathVariable("courseNumber") Long courseNumber, @RequestBody CourseAddLocReq courseAddLocReq) {
-//        // 코스 및 관광지 조회
-//        Course course = courseRepository.findCourseByCourseNumber(courseNumber);
-//
-//        // 존재하지 않는 코스 및 관광지일 때
-//        if (course == null)
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(courseService.addLocToCourse(course, courseAddLocReq.getContentIdList()));
-//    }
 
     // 코스 장소 삭제 API
     @DeleteMapping("/{courseNumber}/delete/{contentId}")
