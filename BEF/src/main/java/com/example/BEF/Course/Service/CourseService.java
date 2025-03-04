@@ -63,21 +63,6 @@ public class CourseService {
         return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
     }
 
-    // 코스 장소 추가
-//    public CourseLocRes addLocToCourse(Course course, List<Long> contentIdList) {
-//
-//        for (Long contentId : contentIdList) {
-//            Location location = locationRepository.findLocationByContentId(contentId);
-//
-//            // 유저 코스 정보 생성
-//            UserCourse userCourse = new UserCourse(course, location);
-//            userCourseRepository.save(userCourse);
-//        }
-//
-//        // 유저 코스 응답 리턴
-//        return (new CourseLocRes(course.getCourseNumber(), course.getCourseName(), contentIdList));
-//    }
-
     // 코스 장소 삭제
     public void delLocToCourse(Course course, Location location) {
         // 유저 코스 정보 생성
@@ -137,7 +122,7 @@ public class CourseService {
     }
 
     @Transactional
-    public Long createAIRecCourse(Long area, Long period, List<Long> disability, List<Long> tripType) {
+    public CourseLocRes createAIRecCourse(Long area, Long period, List<Long> disability, List<Long> tripType) {
 
         // 필터링 된 관광지
         List<Location> filteredLocation = locationRepository.filterByAreaAndDisabilityAndTravelType(
