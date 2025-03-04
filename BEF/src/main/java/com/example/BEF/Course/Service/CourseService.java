@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -136,5 +137,40 @@ public class CourseService {
 //                .toList();
 
         return aiRecCourse.generateCourse(filteredLocation, disability, area, period);
+    }
+
+    @Transactional
+    public CourseLocRes updateCourse(Course course, List<List<Long>> courseLocByDay) {
+        updateCourseOrder(courseLocByDay, course);
+
+        return CourseLocRes.of(course.getCourseNumber(), course.getCourseName(), createSimpleLocs(courseLocByDay));
+    }
+
+    private List<List<SimpleLoc>> createSimpleLocs(List<List<Long>> courseLocByDay) {
+        return courseLocByDay.stream()
+                .map(list -> list.stream()
+                        .map(contentId -> SimpleLoc.from(locationRepository.findLocationByContentId(contentId)))
+                        .collect(Collectors.toList()))
+                .collect(Collectors.toList());
+    }
+
+    private void updateCourseOrder(List<List<Long>> courseLocByDay, Course course) {
+        Long day = 1L;
+        for (List<Long> courseByDay : courseLocByDay) {
+            Long order = 1L;
+            for (Long locationId : courseByDay) {
+                updateUserCourse(course, locationId, day, order);
+                order++;
+            }
+            day++;
+        }
+    }
+
+    private void updateUserCourse(Course course, Long locationId, Long day, Long order) {
+        UserCourse userCourse = userCourseRepository.findUserCourseByCourseAndLocation(course, locationRepository.findLocationByContentId(locationId));
+        userCourse.setDay(day);
+        userCourse.setOrder(order);
+
+        userCourseRepository.save(userCourse);
     }
 }

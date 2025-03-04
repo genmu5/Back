@@ -5,11 +5,13 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "user_course")
 @NoArgsConstructor
 @Getter
+@Setter
 public class UserCourse {
 
     @Id
