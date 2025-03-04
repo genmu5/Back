@@ -209,4 +209,28 @@ public class CourseController {
 
         return ResponseEntity.status(HttpStatus.OK).body(courseService.getCourseLocationList(course));
     }
+
+    // 코스 순서 수정 API
+    @PatchMapping("/{courseNumber}")
+    @Operation(summary = "코스 수정", description = "코스 수정 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "코스를 수정했습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "잘못된 접근입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameter(name = "courseNumber", description = "코스 번호", example = "32")
+    public ResponseEntity<CourseLocRes> CourseUpdate(@RequestBody CourseUpdateReq courseUpdateReq) {
+        // 유저 및 코스 조회
+        User user = userRepository.findUserByUserNumber(courseUpdateReq.getUserNumber());
+        Course course = courseRepository.findCourseByCourseNumber(courseUpdateReq.getCourseNumber());
+
+        // 존재하지 않는 유저일 때
+        if (user == null || course == null || course.getUser() != user)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        CourseLocRes courseLocRes = courseService.updateCourse(course, courseUpdateReq.getCourseLocByDay());
+        if (courseLocRes == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        return ResponseEntity.status(HttpStatus.OK).body(courseLocRes);
+    }
 }
