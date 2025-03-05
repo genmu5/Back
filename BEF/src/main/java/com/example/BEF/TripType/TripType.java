@@ -13,8 +13,4 @@ public class TripType {
     private Long tripTypeNumber;
 
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "course_number")
-    private Course course;
 }
