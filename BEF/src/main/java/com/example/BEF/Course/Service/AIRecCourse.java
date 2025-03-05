@@ -2,6 +2,8 @@ package com.example.BEF.Course.Service;
 
 import com.example.BEF.Area.Repository.AreaRepository;
 import com.example.BEF.Course.DTO.ChatGPTRes;
+import com.example.BEF.Course.DTO.CourseLocRes;
+import com.example.BEF.Course.DTO.SimpleLoc;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Domain.CourseDisability;
 import com.example.BEF.Course.Domain.UserCourse;
@@ -46,7 +48,7 @@ public class AIRecCourse {
     private final UserCourseRepository userCourseRepository;
     private final CourseDisabilityRepository courseDisabilityRepository;
 
-    public Long generateCourse(List<Location> locations, List<Long> disability, Long area, Long period) {
+    public CourseLocRes generateCourse(List<Location> locations, List<Long> disability, Long area, Long period) {
         Map<String, Object> body = createOpenAIRequestBody(locations, area, period);
         HttpHeaders headers = createOpenAIRequestHeader();
 
@@ -104,7 +106,7 @@ public class AIRecCourse {
         return body;
     }
 
-    private Long saveAICourse(List<Long> disability, Long period, Long area, Map<String, List<Long>> dayWiseContentIds) {
+    private CourseLocRes saveAICourse(List<Long> disability, Long period, Long area, Map<String, List<Long>> dayWiseContentIds) {
 
         Course course = Course.builder()
                 .period(period)
@@ -113,14 +115,19 @@ public class AIRecCourse {
 
         courseRepository.save(course);
 
+        List<UserCourse> userCoursesByAICourse = new ArrayList<>();
+
         for (Long day = 1L; day <= 3; day++) {
             List<Long> locaionList = dayWiseContentIds.getOrDefault("Day " + day, List.of());
+            Long courseOrder = 1L;
 
             for (Long content : locaionList) {
-                UserCourse userCourse = new UserCourse(day, course, locationRepository.findLocationByContentId(content));
+                UserCourse userCourse = new UserCourse(day, courseOrder, course, locationRepository.findLocationByContentId(content));
                 if (userCourse.getLocation() == null)
                     continue;
+                userCoursesByAICourse.add(userCourse);
                 userCourseRepository.save(userCourse);
+                courseOrder++;
             }
         }
 
@@ -136,7 +143,21 @@ public class AIRecCourse {
 
         saveCourseDisabilities(disability, course);
 
-        return course.getCourseNumber();
+        return CourseLocRes.of(course.getCourseNumber(), course.getCourseName(), createSimpleLocsByCourse(userCoursesByAICourse));
+    }
+
+    private List<List<SimpleLoc>> createSimpleLocsByCourse(List<UserCourse> userCourses) {
+        List<List<UserCourse>> groupedByDay = new ArrayList<>(
+                userCourses.stream()
+                        .collect(Collectors.groupingBy(UserCourse::getDay))
+                        .values()
+        );
+
+        return groupedByDay.stream()
+                .map(list -> list.stream()
+                        .map(uc -> SimpleLoc.from(uc.getLocation()))
+                        .collect(Collectors.toList()))
+                .collect(Collectors.toList());
     }
 
     private String generatePrompt(List<Location> locations, String area, Long period) {

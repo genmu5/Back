@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,21 +63,6 @@ public class CourseService {
 
         return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
     }
-
-    // 코스 장소 추가
-//    public CourseLocRes addLocToCourse(Course course, List<Long> contentIdList) {
-//
-//        for (Long contentId : contentIdList) {
-//            Location location = locationRepository.findLocationByContentId(contentId);
-//
-//            // 유저 코스 정보 생성
-//            UserCourse userCourse = new UserCourse(course, location);
-//            userCourseRepository.save(userCourse);
-//        }
-//
-//        // 유저 코스 응답 리턴
-//        return (new CourseLocRes(course.getCourseNumber(), course.getCourseName(), contentIdList));
-//    }
 
     // 코스 장소 삭제
     public void delLocToCourse(Course course, Location location) {
@@ -137,7 +123,7 @@ public class CourseService {
     }
 
     @Transactional
-    public Long createAIRecCourse(Long area, Long period, List<Long> disability, List<Long> tripType) {
+    public CourseLocRes createAIRecCourse(Long area, Long period, List<Long> disability, List<Long> tripType) {
 
         // 필터링 된 관광지
         List<Location> filteredLocation = locationRepository.filterByAreaAndDisabilityAndTravelType(
@@ -151,5 +137,40 @@ public class CourseService {
 //                .toList();
 
         return aiRecCourse.generateCourse(filteredLocation, disability, area, period);
+    }
+
+    @Transactional
+    public CourseLocRes updateCourse(Course course, List<List<Long>> courseLocByDay) {
+        updateCourseOrder(courseLocByDay, course);
+
+        return CourseLocRes.of(course.getCourseNumber(), course.getCourseName(), createSimpleLocs(courseLocByDay));
+    }
+
+    private List<List<SimpleLoc>> createSimpleLocs(List<List<Long>> courseLocByDay) {
+        return courseLocByDay.stream()
+                .map(list -> list.stream()
+                        .map(contentId -> SimpleLoc.from(locationRepository.findLocationByContentId(contentId)))
+                        .collect(Collectors.toList()))
+                .collect(Collectors.toList());
+    }
+
+    private void updateCourseOrder(List<List<Long>> courseLocByDay, Course course) {
+        Long day = 1L;
+        for (List<Long> courseByDay : courseLocByDay) {
+            Long order = 1L;
+            for (Long locationId : courseByDay) {
+                updateUserCourse(course, locationId, day, order);
+                order++;
+            }
+            day++;
+        }
+    }
+
+    private void updateUserCourse(Course course, Long locationId, Long day, Long order) {
+        UserCourse userCourse = userCourseRepository.findUserCourseByCourseAndLocation(course, locationRepository.findLocationByContentId(locationId));
+        userCourse.setDay(day);
+        userCourse.setOrder(order);
+
+        userCourseRepository.save(userCourse);
     }
 }
