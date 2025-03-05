@@ -4,9 +4,10 @@ import com.example.BEF.Disabled.Domain.Disabled;
 import com.example.BEF.Disabled.Repository.DisabledRepository;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.User.DTO.UserDisabledDTO;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,60 +17,74 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.example.BEF.Disabled.Domain.QDisabled.disabled;
+import static com.example.BEF.Location.Domain.QLocation.location;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DisabledService {
 
     private final DisabledRepository disabledRepository;
+    private final JPAQueryFactory queryFactory;
+
     @PersistenceContext  // EntityManager 주입
     private EntityManager entityManager;
 
     @Transactional
     public Set<Disabled> filterByUserDisabilityAndTravelType(UserDisabledDTO userDisabledDTO, List<String> travelTypes) {
-        // 기본 SQL 쿼리
-        StringBuilder queryBuilder = new StringBuilder("SELECT d.* FROM disabled d JOIN location l ON d.content_id = l.content_id " +
-                "WHERE (:mobility = false OR (d.elevator IS NOT NULL AND d.elevator <> '' AND d.entrance IS NOT NULL AND d.entrance <> '' AND d.public_transport IS NOT NULL AND d.public_transport <> '')) " +
-                "AND (:blind = false OR (d.braile_block IS NOT NULL AND d.braile_block <> '' AND d.guide_human IS NOT NULL AND d.guide_human <> '')) " +
-                "AND (:hear = false OR (d.sign_guide IS NOT NULL AND d.sign_guide <> '' OR d.video_guide IS NOT NULL AND d.video_guide <> '' OR d.hearing_room IS NOT NULL AND d.hearing_room <> '' OR d.hearing_handicap_etc IS NOT NULL AND d.hearing_handicap_etc <> '')) " +
-                "AND (:family = false OR (d.stroller IS NOT NULL AND d.stroller <> '' OR d.lactation_room IS NOT NULL AND d.lactation_room <> '' OR d.baby_spare_chair IS NOT NULL AND d.baby_spare_chair <> '' OR d.infants_family_etc IS NOT NULL AND d.infants_family_etc <> '')) ");
+        BooleanBuilder whereClause = new BooleanBuilder();
 
-        // travelTypes가 존재하면 각 travelType에 대해 LIKE 조건 추가
-        if (travelTypes != null && !travelTypes.isEmpty()) {
-            queryBuilder.append("AND (");
-            for (int i = 0; i < travelTypes.size(); i++) {
-                queryBuilder.append("l.description LIKE :travelType").append(i);
-                if (i < travelTypes.size() - 1) {
-                    queryBuilder.append(" OR ");
-                }
-            }
-            queryBuilder.append(")");
+        // 장애 유형 필터링
+        if (userDisabledDTO.getMobility()) {
+            whereClause.and(disabled.elevator.isNotNull()
+                    .and(disabled.elevator.ne(""))
+                    .and(disabled.entrance.isNotNull())
+                    .and(disabled.entrance.ne(""))
+                    .and(disabled.publicTransport.isNotNull())
+                    .and(disabled.publicTransport.ne("")));
         }
 
-        // 로그로 SQL 쿼리 출력
-        log.info("Generated Query: {}", queryBuilder.toString());
-
-        // Query 생성
-        Query query = entityManager.createNativeQuery(queryBuilder.toString(), Disabled.class);
-
-        // 파라미터 바인딩
-        query.setParameter("mobility", userDisabledDTO.getMobility());
-        query.setParameter("blind", userDisabledDTO.getBlind());
-        query.setParameter("hear", userDisabledDTO.getHear());
-        query.setParameter("family", userDisabledDTO.getFamily());
-
-        // travelTypes가 존재하면 각 travelType에 대한 파라미터 설정
-        if (travelTypes != null && !travelTypes.isEmpty()) {
-            for (int i = 0; i < travelTypes.size(); i++) {
-                query.setParameter("travelType" + i, "%" + travelTypes.get(i) + "%");
-            }
+        if (userDisabledDTO.getBlind()) {
+            whereClause.and(disabled.braileBlock.isNotNull()
+                    .and(disabled.braileBlock.ne(""))
+                    .and(disabled.guideHuman.isNotNull())
+                    .and(disabled.guideHuman.ne("")));
         }
 
-        // 결과 실행 및 반환
-        List<Disabled> resultList = query.getResultList();
-        return new HashSet<>(resultList);  // 중복 제거를 위해 Set으로 변환
+        if (userDisabledDTO.getHear()) {
+            whereClause.and(disabled.signGuide.isNotNull().and(disabled.signGuide.ne(""))
+                    .or(disabled.videoGuide.isNotNull().and(disabled.videoGuide.ne("")))
+                    .or(disabled.hearingRoom.isNotNull().and(disabled.hearingRoom.ne("")))
+                    .or(disabled.hearingHandicapEtc.isNotNull().and(disabled.hearingHandicapEtc.ne(""))));
+        }
+
+        if (userDisabledDTO.getFamily()) {
+            whereClause.and(disabled.stroller.isNotNull().and(disabled.stroller.ne(""))
+                    .or(disabled.lactationRoom.isNotNull().and(disabled.lactationRoom.ne("")))
+                    .or(disabled.babySpareChair.isNotNull().and(disabled.babySpareChair.ne("")))
+                    .or(disabled.infantsFamilyEtc.isNotNull().and(disabled.infantsFamilyEtc.ne(""))));
+        }
+
+        // 여행 유형 필터링 (LIKE 검색)
+        if (travelTypes != null && !travelTypes.isEmpty()) {
+            BooleanBuilder travelTypeFilter = new BooleanBuilder();
+            for (String type : travelTypes) {
+                travelTypeFilter.or(location.description.likeIgnoreCase("%" + type + "%"));
+            }
+            whereClause.and(travelTypeFilter);
+        }
+
+        // Query 실행
+        List<Disabled> result = queryFactory
+                .selectFrom(disabled)
+                .join(location).on(disabled.location.eq(location))
+                .where(whereClause)
+                .fetch();
+
+
+        return new HashSet<>(result); // 중복 제거를 위해 Set으로 변환
     }
-
 
     public Disabled findDisabledByLocation(Location location) {
         return disabledRepository.findDisabledByLocation(location);

@@ -17,9 +17,6 @@ public class Disability {
 
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "course_number")
-    private Course course;
 
     @OneToMany(mappedBy = "disability")
     private List<CourseDisability> courseDisabilities;

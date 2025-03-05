@@ -61,10 +61,10 @@ public class UserService {
         User disabledUser = userRepository.findUserByUserNumber(userNumber);
 
 
-        return (UserDisabledDTO.of(userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName("MOBILITY")),
-                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName("BLIND")),
-                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName("HEAR")),
-                userDisabilityRepository.findByUserAndDisability(disabledUser, disabilityRepository.findByName("FAMILY"))));
+        return (UserDisabledDTO.of(userDisabilityRepository.existsByUserAndDisability(disabledUser, disabilityRepository.findByName("MOBILITY")),
+                userDisabilityRepository.existsByUserAndDisability(disabledUser, disabilityRepository.findByName("BLIND")),
+                userDisabilityRepository.existsByUserAndDisability(disabledUser, disabilityRepository.findByName("HEAR")),
+                userDisabilityRepository.existsByUserAndDisability(disabledUser, disabilityRepository.findByName("FAMILY"))));
     }
 
     public Boolean existUser(Long userNumber) {

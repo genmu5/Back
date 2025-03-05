@@ -41,13 +41,13 @@ public class LocationService {
         // 여행 타입별 단어 리스트
         List<String> userType = new ArrayList<>();
 
-        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("FOREST")))
+        if (userTripTypeRepository.existsByUserAndTripType(user, tripTypeRepository.findByName("FOREST")))
             userType.addAll(Arrays.asList("숲", "휴양림", "산림욕장", "치유"));
-        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("OCEAN")))
+        if (userTripTypeRepository.existsByUserAndTripType(user, tripTypeRepository.findByName("OCEAN")))
             userType.addAll(Arrays.asList("해수욕장", "바다", "물놀이", "호수"));
-        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("HISTORY")))
+        if (userTripTypeRepository.existsByUserAndTripType(user, tripTypeRepository.findByName("HISTORY")))
             userType.addAll(Arrays.asList("박물관", "미술관", "역사", "문화", "사찰"));
-        if (userTripTypeRepository.findByUserAndTripType(user, tripTypeRepository.findByName("OUTSIDE")))
+        if (userTripTypeRepository.existsByUserAndTripType(user, tripTypeRepository.findByName("OUTSIDE")))
             userType.addAll(Arrays.asList("가족", "어린이", "공원", "파크", "레저"));
 
         // 유저 장애 정보
