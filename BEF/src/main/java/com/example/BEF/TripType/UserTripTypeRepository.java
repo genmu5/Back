@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserTripTypeRepository extends JpaRepository<UserTripType, Long> {
-    boolean findByUserAndTripType(User user, TripType tripType);
+    boolean existsByUserAndTripType(User user, TripType tripType);
 
 }
