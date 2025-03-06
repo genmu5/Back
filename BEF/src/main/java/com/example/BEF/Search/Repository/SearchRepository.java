@@ -14,7 +14,10 @@ public interface SearchRepository extends JpaRepository<Location , Long> {
 
     //하버사인 공식을 통해 구면적기리 반경 10km 안에 있는 장소 제공
     @Query(value = "SELECT * FROM location l " +
-            "WHERE (6371 * acos(cos(radians(:lat)) * cos(radians(l.gps_y)) * cos(radians(l.gps_x) - radians(:lng)) + sin(radians(:lat)) * sin(radians(l.gps_y)))) < 10",
+            "WHERE (6371 * acos(cos(radians(:lat)) * cos(radians(l.gps_y)) * cos(radians(l.gps_x) - radians(:lng)) + sin(radians(:lat)) * sin(radians(l.gps_y)))) < 10 " +
+            "AND l.content_id >= (SELECT FLOOR(RAND() * (SELECT MAX(content_id) FROM location))) " +
+            "LIMIT 50",
             nativeQuery = true)
-    List<Location> findLocationsWithinRadius(@org.springframework.data.repository.query.Param("lat") double lat, @org.springframework.data.repository.query.Param("lng") double lng);
+    List<Location> findLocationsWithinRadius(@Param("lat") double lat, @Param("lng") double lng);
+
 }
