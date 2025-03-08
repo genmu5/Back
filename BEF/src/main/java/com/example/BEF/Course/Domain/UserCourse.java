@@ -22,7 +22,7 @@ public class UserCourse {
     @Column(name = "day")
     private Long day;
 
-    @Column(name = "order")
+    @Column(name = "`order`")
     private Long order;
 
     @ManyToOne

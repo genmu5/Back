@@ -162,7 +162,7 @@ public class AIRecCourse {
         saveCourseDisabilities(disability, course);
         saveCourseTripTypes(tripType, course);
 
-        return CourseLocRes.of(course.getCourseNumber(), course.getCourseName(), createSimpleLocsByCourse(userCoursesByAICourse));
+        return CourseLocRes.of(course.getCourseNumber(), "", createSimpleLocsByCourse(userCoursesByAICourse));
     }
 
     private List<List<SimpleLoc>> createSimpleLocsByCourse(List<UserCourse> userCourses) {
