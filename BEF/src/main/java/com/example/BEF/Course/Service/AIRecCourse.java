@@ -6,13 +6,16 @@ import com.example.BEF.Course.DTO.CourseLocRes;
 import com.example.BEF.Course.DTO.SimpleLoc;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Domain.CourseDisability;
+import com.example.BEF.Course.Domain.CourseTripType;
 import com.example.BEF.Course.Domain.UserCourse;
 import com.example.BEF.Course.Repository.CourseDisabilityRepository;
 import com.example.BEF.Course.Repository.CourseRepository;
+import com.example.BEF.Course.Repository.CourseTripTypeRepository;
 import com.example.BEF.Course.Repository.UserCourseRepository;
 import com.example.BEF.Disability.DisabilityRepository;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
+import com.example.BEF.TripType.TripTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,11 +47,13 @@ public class AIRecCourse {
     private final AreaRepository areaRepository;
     private final CourseRepository courseRepository;
     private final DisabilityRepository disabilityRepository;
+    private final TripTypeRepository tripTypeRepository;
     private final LocationRepository locationRepository;
     private final UserCourseRepository userCourseRepository;
     private final CourseDisabilityRepository courseDisabilityRepository;
+    private final CourseTripTypeRepository courseTripTypeRepository;
 
-    public CourseLocRes generateCourse(List<Location> locations, List<Long> disability, Long area, Long period) {
+    public CourseLocRes generateCourse(List<Location> locations, List<Long> disability, List<Long> tripType, Long area, Long period) {
         Map<String, Object> body = createOpenAIRequestBody(locations, area, period);
         HttpHeaders headers = createOpenAIRequestHeader();
 
@@ -63,7 +68,7 @@ public class AIRecCourse {
 
             Map<String, List<Long>> dayWiseContentIds = parseDayWiseContentIds(aiResponse);
 
-            return saveAICourse(disability, period, area, dayWiseContentIds);
+            return saveAICourse(disability, tripType, period, area, dayWiseContentIds);
         }
         catch (NullPointerException e) {
             log.info("Null Pointer Exception 발생");
@@ -82,6 +87,19 @@ public class AIRecCourse {
         }
 
         courseDisabilityRepository.saveAll(courseDisabilities);
+    }
+
+    private void saveCourseTripTypes(List<Long> tripTypes, Course course) {
+        List<CourseTripType> courseTripTypes = new ArrayList<>();
+
+        for (Long tripType : tripTypes) {
+            courseTripTypes.add(CourseTripType.builder()
+                    .course(course)
+                    .tripType(tripTypeRepository.findTripTypeEntityByTripTypeNumber(tripType))
+                    .build());
+        }
+
+        courseTripTypeRepository.saveAll(courseTripTypes);
     }
 
     private HttpHeaders createOpenAIRequestHeader() {
@@ -106,7 +124,7 @@ public class AIRecCourse {
         return body;
     }
 
-    private CourseLocRes saveAICourse(List<Long> disability, Long period, Long area, Map<String, List<Long>> dayWiseContentIds) {
+    private CourseLocRes saveAICourse(List<Long> disability, List<Long> tripType, Long period, Long area, Map<String, List<Long>> dayWiseContentIds) {
 
         Course course = Course.builder()
                 .period(period)
@@ -142,6 +160,7 @@ public class AIRecCourse {
         }
 
         saveCourseDisabilities(disability, course);
+        saveCourseTripTypes(tripType, course);
 
         return CourseLocRes.of(course.getCourseNumber(), course.getCourseName(), createSimpleLocsByCourse(userCoursesByAICourse));
     }
