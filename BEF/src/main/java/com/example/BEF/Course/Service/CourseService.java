@@ -10,7 +10,6 @@ import com.example.BEF.Course.Repository.UserCourseRepository;
 import com.example.BEF.Disabled.Domain.Disabled;
 import com.example.BEF.Disabled.Repository.DisabledRepository;
 import com.example.BEF.Location.DTO.LocationInfoRes;
-import com.example.BEF.Location.DTO.UserLocationRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
 import com.example.BEF.User.Domain.User;
@@ -87,21 +86,21 @@ public class CourseService {
     }
 
     // 저장한 관광지 목록 조회
-    public List<UserLocationRes> getUserSaveLocations(User user) {
+    public List<LocationInfoRes> getUserSaveLocations(User user) {
 
         // 유저가 저장한 관광지들
         List<Saved> savedList = savedRepository.findAllByUser(user);
 
         // 저장한 관광지 정보 리스트
-        List<UserLocationRes> userLocationResList = new ArrayList<>();
+        List<LocationInfoRes> locationInfoResList = new ArrayList<>();
 
         for (Saved saved : savedList) {
             Location location = saved.getLocation();
-            UserLocationRes userLocationRes = new UserLocationRes(location.getContentId(), location.getContentTitle(), location.getAddr(), location.getThumbnailImage());
-            userLocationResList.add(userLocationRes);
+            LocationInfoRes locationInfoRes = new LocationInfoRes(location, disabledRepository.findDisabledByLocation(location));
+            locationInfoResList.add(locationInfoRes);
         }
 
-        return (userLocationResList);
+        return (locationInfoResList);
     }
 
     // 코스 관광지 목록 조회

@@ -6,7 +6,7 @@ import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Repository.CourseRepository;
 import com.example.BEF.Disability.Disability;
 import com.example.BEF.Disability.UserDisability;
-import com.example.BEF.Location.DTO.UserLocationRes;
+import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
 import com.example.BEF.TripType.TripType;
@@ -180,7 +180,7 @@ public class CourseController {
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
     @Parameter(name = "userNumber", description = "유저 번호", example = "32")
-    public ResponseEntity<List<UserLocationRes>> saveLocationList(@PathVariable("userNumber") Long userNumber) {
+    public ResponseEntity<List<LocationInfoRes>> saveLocationList(@PathVariable("userNumber") Long userNumber) {
         // 유저 조회
         User user = userRepository.findUserByUserNumber(userNumber);
 
