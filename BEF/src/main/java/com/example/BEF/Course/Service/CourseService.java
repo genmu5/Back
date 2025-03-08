@@ -135,7 +135,7 @@ public class CourseService {
 //                .limit(80)
 //                .toList();
 
-        return aiRecCourse.generateCourse(filteredLocation, disability, area, period);
+        return aiRecCourse.generateCourse(filteredLocation, disability, tripType, area, period);
     }
 
     @Transactional
