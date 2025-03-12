@@ -6,11 +6,13 @@ import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Repository.CourseRepository;
 import com.example.BEF.Disability.Disability;
 import com.example.BEF.Disability.UserDisability;
+import com.example.BEF.Disability.UserDisabilityRepository;
 import com.example.BEF.Location.DTO.LocationInfoRes;
 import com.example.BEF.Location.Domain.Location;
 import com.example.BEF.Location.Repository.LocationRepository;
 import com.example.BEF.TripType.TripType;
 import com.example.BEF.TripType.UserTripType;
+import com.example.BEF.TripType.UserTripTypeRepository;
 import com.example.BEF.User.Domain.User;
 import com.example.BEF.User.Service.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +38,8 @@ public class CourseController {
 
     private final CourseService courseService;
     private final UserRepository userRepository;
+    private final UserDisabilityRepository userDisabilityRepository;
+    private final UserTripTypeRepository userTripTypeRepository;
     private final LocationRepository locationRepository;
     private final CourseRepository courseRepository;
 
@@ -47,8 +51,8 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         CourseLocRes courseLocRes = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(),
-                user.getDisabilities().stream().map(UserDisability::getDisability).map(Disability::getDisabilityNumber).toList(),
-                user.getTripTypes().stream().map(UserTripType::getTripType).map(TripType::getTripTypeNumber).toList());
+                userDisabilityRepository.findAllByUser(user).stream().map(UserDisability::getDisability).map(Disability::getDisabilityNumber).toList(),
+                userTripTypeRepository.findAllByUser(user).stream().map(UserTripType::getTripType).map(TripType::getTripTypeNumber).toList());
 
         if (courseLocRes == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
