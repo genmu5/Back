@@ -3,10 +3,12 @@ package com.example.BEF.Course.Domain;
 import com.example.BEF.Disability.Disability;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
+@Getter
 public class CourseDisability {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
