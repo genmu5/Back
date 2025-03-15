@@ -84,7 +84,7 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "코스 생성에 성공하였습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 유저입니다.", content = @Content(mediaType = "application/json")),
     })
-    public ResponseEntity<CourseInfoRes> addCourse(@RequestBody CreateCourseReq createCourseReq) {
+    public ResponseEntity<CourseLocationRes> addCourse(@RequestBody CreateCourseReq createCourseReq) {
         // 유저 조회
         User user = userRepository.findUserByUserNumber(createCourseReq.getUserNumber());
 

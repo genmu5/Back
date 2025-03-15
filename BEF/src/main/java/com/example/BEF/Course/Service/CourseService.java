@@ -40,7 +40,13 @@ public class CourseService {
     public CourseInfoRes addCourse(User user, CreateCourseReq createCourseReq) {
         Course course = addCourseInfo(user, createCourseReq);
 
-        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
+        for (UserCourse userCourse : userCourses) {
+            Location location = userCourse.getLocation();
+            Disabled disabled = disabledRepository.findDisabledByLocation(location);
+            LocationInfoRes locationInfoRes = new LocationInfoRes(location, disabled);
+            locationInfoResList.add(locationInfoRes);
+        }
+
         return new CourseLocationRes(course, courseDisabilityRepository.findAllByCourse(course), locationInfoResList);
     }
 
