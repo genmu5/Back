@@ -82,7 +82,11 @@ public class CourseService {
 
     // 코스 목록 조회
     public List<CourseInfoRes> findUserCourses(User user) {
-        return courseRepository.findCourseNumbersAndCourseNamesByUser(user);
+        List<Course> courses = courseRepository.findAllByUser(user);
+
+        return courses.stream()
+                .map(course -> CourseInfoRes.of(course, courseDisabilityRepository.findAllByCourse(course)))
+                .toList();
     }
 
     // 관광지 저장
