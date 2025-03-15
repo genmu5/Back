@@ -13,9 +13,11 @@ import com.example.BEF.User.DTO.UserJoinRes;
 import com.example.BEF.User.Domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -28,9 +30,32 @@ public class UserService {
     private final DisabilityRepository disabilityRepository;
     private final UserDisabilityRepository userDisabilityRepository;
 
+    private boolean validJoin(UserJoinReq userJoinReq) {
+        if (isBlank(userJoinReq.getUserName())
+                || isBlank(userJoinReq.getGender())
+                || userJoinReq.getBirth() == null)
+            return false;
+
+        // 장애 유형 검증
+        if (!isValidList(userJoinReq.getDisability(), disabilityRepository::existsByDisabilityNumber))
+            return false;
+
+        // 선호 여행 타입 검증
+        return isValidList(userJoinReq.getTripType(), tripTypeRepository::existsByTripTypeNumber);
+    }
+
+    private boolean isBlank(String str) {
+        return str == null || str.isBlank();
+    }
+
+    private <T> boolean isValidList(List<T> list, Predicate<T> existsCheck) {
+        return list != null && !list.isEmpty() && list.stream().allMatch(existsCheck);
+    }
+
+    @Transactional
     public UserJoinRes saveUser(UserJoinReq userJoinReq) {
         // 회원가입 가능 여부 확인
-        if (!userJoinReq.validJoin())
+        if (!validJoin(userJoinReq))
             return (null);
 
         // 저장할 유저 생성
