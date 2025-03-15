@@ -37,8 +37,11 @@ public class CourseService {
 
     @Transactional
     // 코스 생성
-    public CourseInfoRes addCourse(User user, CreateCourseReq createCourseReq) {
+    public CourseLocationRes addCourse(User user, CreateCourseReq createCourseReq) {
         Course course = addCourseInfo(user, createCourseReq);
+        List<UserCourse> userCourses = userCourseRepository.findUserCoursesByCourse(course);
+
+        List<LocationInfoRes> locationInfoResList = new ArrayList<>();
 
         for (UserCourse userCourse : userCourses) {
             Location location = userCourse.getLocation();
