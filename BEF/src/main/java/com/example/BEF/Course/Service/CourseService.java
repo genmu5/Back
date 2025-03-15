@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,6 +84,17 @@ public class CourseService {
 
         // 유저 코스 응답 리턴
         return (new CourseSaveRes(location.getContentId()));
+    }
+
+    public void deleteSavedLocation(User user, Location location) {
+        // 특정 유저가 저장한 특정 관광지 조회
+        Optional<Saved> saved = savedRepository.findByUserAndLocation(user, location);
+
+        if (saved.isPresent()) {
+            savedRepository.delete(saved.get());
+        } else {
+            throw new IllegalArgumentException("해당 관광지가 저장되어 있지 않습니다.");
+        }
     }
 
     // 저장한 관광지 목록 조회
