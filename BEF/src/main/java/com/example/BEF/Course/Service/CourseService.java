@@ -4,6 +4,7 @@ import com.example.BEF.Course.DTO.*;
 import com.example.BEF.Course.Domain.Course;
 import com.example.BEF.Course.Domain.Saved;
 import com.example.BEF.Course.Domain.UserCourse;
+import com.example.BEF.Course.Repository.CourseDisabilityRepository;
 import com.example.BEF.Course.Repository.CourseRepository;
 import com.example.BEF.Course.Repository.SavedRepository;
 import com.example.BEF.Course.Repository.UserCourseRepository;
@@ -28,6 +29,7 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final UserCourseRepository userCourseRepository;
+    private final CourseDisabilityRepository courseDisabilityRepository;
     private final LocationRepository locationRepository;
     private final DisabledRepository disabledRepository;
     private final SavedRepository savedRepository;
@@ -39,6 +41,7 @@ public class CourseService {
         Course course = addCourseInfo(user, createCourseReq);
 
         return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
+        return new CourseLocationRes(course, courseDisabilityRepository.findAllByCourse(course), locationInfoResList);
     }
 
     private Course addCourseInfo(User user, CreateCourseReq createCourseReq) {
@@ -61,7 +64,7 @@ public class CourseService {
         // 코스 정보 삭제
         courseRepository.delete(course);
 
-        return new CourseInfoRes(course.getCourseNumber(), course.getCourseName());
+        return CourseInfoRes.of(course, courseDisabilityRepository.findAllByCourse(course));
     }
 
     // 코스 장소 삭제
@@ -130,7 +133,7 @@ public class CourseService {
             locationInfoResList.add(locationInfoRes);
         }
 
-        return (new CourseLocationRes(course, locationInfoResList));
+        return (new CourseLocationRes(course, courseDisabilityRepository.findAllByCourse(course), locationInfoResList));
     }
 
     @Transactional
