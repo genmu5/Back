@@ -41,6 +41,10 @@ public class CourseController {
 
     // AI 코스 빠른 생성 API
     @PostMapping("/ai-rec-quick")
+    @Operation(summary = "AI 코스 리스트 생성", description = "AI 코스 리스트 생성 API")
+    @Parameter(name = "userNumber", description = "유저 번호", example = "116")
+    @Parameter(name = "area", description = "지역 번호", example = "1")
+    @Parameter(name = "period", description = "여행기간", example = "3")
     public ResponseEntity<CourseLocRes> createAIRecQuick(@RequestBody AIQuickCourseReq aiCourseReq) {
         User user = userRepository.findUserByUserNumber(aiCourseReq.getUserNumber());
         if (user == null)
@@ -58,6 +62,12 @@ public class CourseController {
 
     // AI 코스 세부 생성 API
     @PostMapping("/ai-rec")
+    @Operation(summary = "AI 코스 세부 생성", description = "AI 코스 세부 생성 API")
+    @Parameter(name = "userNumber", description = "유저 번호", example = "116")
+    @Parameter(name = "area", description = "지역 번호", example = "1")
+    @Parameter(name = "period", description = "여행기간", example = "3")
+    @Parameter(name = "TripType", description = "여행 유형", example = "[1, 2]")
+    @Parameter(name = "Disability", description = "장애 지원", example = "[3, 4]")
     public ResponseEntity<CourseLocRes> createAIRec(@RequestBody AICourseReq aiCourseReq) {
         CourseLocRes courseLocRes = courseService.createAIRecCourse(aiCourseReq.getArea(), aiCourseReq.getPeriod(), aiCourseReq.getDisability(), aiCourseReq.getTripType());
 
@@ -190,6 +200,34 @@ public class CourseController {
         return ResponseEntity.status(HttpStatus.OK).body(courseService.getUserSaveLocations(user));
     }
 
+    // 저장한 관광지 삭제 API
+    @DeleteMapping("/save/{userNumber}/{contentId}")
+    @Operation(summary = "저장한 관광지 삭제", description = "유저가 저장한 특정 관광지를 삭제하는 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "관광지를 삭제했습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 유저 또는 관광지입니다.", content = @Content(mediaType = "application/json")),
+    })
+    @Parameters({
+            @Parameter(name = "userNumber", description = "유저 번호", example = "32"),
+            @Parameter(name = "contentId", description = "관광지 ID", example = "101")
+    })
+    public ResponseEntity<String> deleteSavedLocation(
+            @PathVariable("userNumber") Long userNumber,
+            @PathVariable("contentId") Long contentId) {
+
+        // 유저 및 관광지 조회
+        User user = userRepository.findUserByUserNumber(userNumber);
+        Location location = locationRepository.findLocationByContentId(contentId);
+
+        // 존재하지 않는 유저 또는 관광지일 때
+        if (user == null || location == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("존재하지 않는 유저 또는 관광지입니다.");
+        }
+
+        // 삭제 실행
+        courseService.deleteSavedLocation(user, location);
+        return ResponseEntity.status(HttpStatus.OK).body("관광지를 삭제했습니다.");
+    }
     // 코스 관광지 조회 API
     @GetMapping("/{courseNumber}/list")
     @Operation(summary = "코스 관광지 조회", description = "코스 관광지 조회 API")
