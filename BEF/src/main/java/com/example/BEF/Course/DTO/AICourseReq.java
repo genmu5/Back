@@ -21,4 +21,6 @@ public class AICourseReq
 
     @Schema(description = "여행 기간 (일 단위)", example = "3", required = true)
     private Long period;
+
+    private Long userNumber;
 }
