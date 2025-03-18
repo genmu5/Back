@@ -55,7 +55,9 @@ public class Course {
     private List<UserCourse> userCourses;
 
     @Builder
-    public Course(Long period, Double gpsX, Double gpsY, Area area) {
+    public Course(String courseName, Long period, Double gpsX, Double gpsY, Area area, User user) {
+        this.courseName = courseName;
+        this.user = user;
         this.period = period;
         this.gpsX = gpsX;
         this.gpsY = gpsY;
