@@ -36,12 +36,19 @@ public class UserService {
                 || userJoinReq.getBirth() == null)
             return false;
 
-        // 장애 유형 검증
-        if (!isValidList(userJoinReq.getDisability(), disabilityRepository::existsByDisabilityNumber))
-            return false;
+        // 장애 유형이 존재할 경우만 유효성 검사
+        if (userJoinReq.getDisability() != null && !userJoinReq.getDisability().isEmpty()) {
+            if (!isValidList(userJoinReq.getDisability(), disabilityRepository::existsByDisabilityNumber))
+                return false;
+        }
 
-        // 선호 여행 타입 검증
-        return isValidList(userJoinReq.getTripType(), tripTypeRepository::existsByTripTypeNumber);
+        // 선호 여행 타입이 존재할 경우만 유효성 검사
+        if (userJoinReq.getTripType() != null && !userJoinReq.getTripType().isEmpty()) {
+            if (!isValidList(userJoinReq.getTripType(), tripTypeRepository::existsByTripTypeNumber))
+                return false;
+        }
+
+        return true;
     }
 
     private boolean isBlank(String str) {
@@ -66,18 +73,21 @@ public class UserService {
         // 유저 저장
         userRepository.save(savedUser);
 
-        // 유저 여행 타입 저장
-        userTripTypeRepository.saveAll(userJoinReq.getTripType().stream()
-                .map(tripTypeRepository::findTripTypeEntityByTripTypeNumber)
-                .map(tripTypeEntity -> UserTripType.of(savedUser, tripTypeEntity))
-                .toList());
+        // 여행 타입 저장 (선택적)
+        if (userJoinReq.getTripType() != null && !userJoinReq.getTripType().isEmpty()) {
+            userTripTypeRepository.saveAll(userJoinReq.getTripType().stream()
+                    .map(tripTypeRepository::findTripTypeEntityByTripTypeNumber)
+                    .map(tripTypeEntity -> UserTripType.of(savedUser, tripTypeEntity))
+                    .toList());
+        }
 
-        // 유저 장애 유형 저장
-        userDisabilityRepository.saveAll(userJoinReq.getDisability().stream()
-                .map(disabilityRepository::findDisabilityByDisabilityNumber)
-                .map(disabilityEntity -> UserDisability.of(savedUser, disabilityEntity))
-                .toList());
-
+        // 장애 정보 저장 (선택적)
+        if (userJoinReq.getDisability() != null && !userJoinReq.getDisability().isEmpty()) {
+            userDisabilityRepository.saveAll(userJoinReq.getDisability().stream()
+                    .map(disabilityRepository::findDisabilityByDisabilityNumber)
+                    .map(disabilityEntity -> UserDisability.of(savedUser, disabilityEntity))
+                    .toList());
+        }
         // 유저 정보 리턴
         return (new UserJoinRes(savedUser.getUserNumber(), savedUser.getUserName()));
     }
