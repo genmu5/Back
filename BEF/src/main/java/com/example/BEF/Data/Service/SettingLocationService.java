@@ -72,6 +72,12 @@ public class SettingLocationService {
 
             for (int i = 0; i < items.length(); i++) {
                 JSONObject item = items.getJSONObject(i);
+
+                if (!item.has("firstimage") || item.getString("firstimage").isEmpty())
+                    continue;
+                if (!item.has("firstimage2") || item.getString("firstimage2").isEmpty())
+                    continue;
+
                 Location location = objectMapper.readValue(item.toString(), Location.class);
 
                 // Location 엔티티 생성
